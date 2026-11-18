@@ -133,24 +133,26 @@ function render(){CH.forEach(c=>c.destroy());CH=[];const f={dash:vDash,pres:vPre
 setInterval(async()=>{if(!S.user||document.hidden||!['dash','pres','dl'].includes(S.view)||$('#mo').innerHTML)return;if(await loadAtt(mOf()))render()},15000);
 
 /* ---------- dashboard ---------- */
-function vDash(){const t=today(),m=t.slice(0,7),{mp,fl}=amap(m),ds=days(m).filter(d=>d<=t),L=S.siswa.filter(s=>s.jk==='L').length;
- S.dl=[L,S.siswa.length-L];
- S.dd=S.kelas.map(k=>{const n=sis(k).length;let h=0;sis(k).forEach(s=>{if(mp[t+'|'+k+'|'+s.nipd]==='H')h++});return{k,n,h,ok:!!fl[t+'|'+k]}});
- S.dm=S.kelas.map(k=>{let h=0,tt=0;sis(k).forEach(s=>ds.forEach(d=>{const v=mp[d+'|'+k+'|'+s.nipd];if(v){tt++;if(v==='H')h++}}));return{k,h,tt,pct:tt?Math.round(h/tt*1000)/10:0,miss:ds.filter(d=>!fl[d+'|'+k]).length}});
- let al='';const tags=a=>a.map(x=>`<span class="tg">${esc(x)}</span>`).join('');
- if(S.user.def)al+=`<div class="al bl">Anda masih memakai ${isA()?'password':'PIN'} standar. Ganti di menu Setting.</div>`;
- if(!wk(t))al+=`<div class="al bl">Hari ini akhir pekan, presensi harian tidak diisi.</div>`;
- else{const b=S.dd.filter(x=>!x.ok).map(x=>x.k);al+=b.length?`<div class="al"><b>Belum mengisi presensi hari ini (${tgl(t)})</b><br>${tags(b)}</div>`:`<div class="al bl">Semua rombel sudah mengisi presensi hari ini.</div>`}
- const bm=S.dm.filter(x=>x.miss>0);if(bm.length)al+=`<div class="al"><b>Presensi bulan ${bl(m)} belum lengkap</b> (hari sekolah yang belum terisi)<br>${tags(bm.map(x=>x.k+': '+x.miss+' hari'))}</div>`;
- const lg='<div class="lg">'+S.kelas.map(k=>`<span><i style="background:${kc(k)}"></i>${esc(k)}</span>`).join('')+'</div>',h=S.kelas.length*30+70;
- return al+`<div class="grid"><div class="stat"><b>${S.siswa.length}</b><span>Total siswa</span></div><div class="stat" style="border-color:#2f6fdb"><b>${L}</b><span>Laki-laki</span></div><div class="stat" style="border-color:#ec4899"><b>${S.siswa.length-L}</b><span>Perempuan</span></div><div class="stat" style="border-color:#f59e0b"><b>${S.kelas.length}</b><span>Rombel</span></div></div>
- <div class="two"><div class="card"><h3>Jenis kelamin</h3><canvas id="c1"></canvas></div><div class="card"><h3>Kehadiran harian per rombel</h3><div style="height:${h}px"><canvas id="c2"></canvas></div>${lg}</div></div>
- <div class="card"><h3>Rekap kehadiran bulan ${bl(m)}</h3><div style="height:${h}px"><canvas id="c3"></canvas></div>${lg}</div>`}
-function chartsInit(){const cs=getComputedStyle(document.body);Chart.defaults.color=cs.color;Chart.defaults.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--bd');
- const ks=S.kelas,bar=(id,d,lab)=>CH.push(new Chart($(id),{type:'bar',data:{labels:ks,datasets:[{data:d,backgroundColor:ks.map(kc),borderRadius:6}]},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:lab}}},scales:{x:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}}));
+function vDash(){const t=today(),m=t.slice(0,7),{mp,fl}=amap(m),ds=days(m).filter(d=>d<=t),a=isA(),k=a?'':S.user.wali,P=k?sis(k):S.siswa,L=P.filter(s=>s.jk==='L').length,ks=k?[k]:S.kelas;
+ S.dl=[L,P.length-L];S.dc=null;
+ S.dm=ks.map(x=>{let h=0,tt=0;sis(x).forEach(s=>ds.forEach(d=>{const v=mp[d+'|'+x+'|'+s.nipd];if(v){tt++;if(v==='H')h++}}));return{k:x,h,tt,pct:tt?Math.round(h/tt*1000)/10:0,miss:ds.filter(d=>!fl[d+'|'+x]).length}});
+ let al='',pc='';
+ if(k){const c={H:0,S:0,I:0,A:0};sis(k).forEach(s=>ds.forEach(d=>{const v=mp[d+'|'+k+'|'+s.nipd];if(v)c[v]++}));S.dc=c;const n=c.H+c.S+c.I+c.A;
+  pc=`<p style="margin:10px 0 0">Persentase kehadiran bulan ini: <b>${n?(c.H/n*100).toFixed(1):0}%</b></p>`}
+ if(a){const tags=x=>x.map(y=>`<span class="tg">${esc(y)}</span>`).join('');
+  if(S.user.def)al+=`<div class="al bl">Anda masih memakai password standar. Ganti di menu Setting.</div>`;
+  if(!wk(t))al+=`<div class="al bl">Hari ini akhir pekan, presensi harian tidak diisi.</div>`;
+  else{const b=S.kelas.filter(x=>!fl[t+'|'+x]);al+=b.length?`<div class="al"><b>Belum mengisi presensi hari ini (${tgl(t)})</b><br>${tags(b)}</div>`:`<div class="al bl">Semua rombel sudah mengisi presensi hari ini.</div>`}
+  const bm=S.dm.filter(x=>x.miss>0);if(bm.length)al+=`<div class="al"><b>Presensi bulan ${bl(m)} belum lengkap</b> (hari sekolah yang belum terisi)<br>${tags(bm.map(x=>x.k+': '+x.miss+' hari'))}</div>`}
+ const lg=k?'':'<div class="lg">'+S.kelas.map(x=>`<span><i style="background:${kc(x)}"></i>${esc(x)}</span>`).join('')+'</div>',h=k?200:S.kelas.length*30+70;
+ return al+`<div class="grid"><div class="stat"><b>${P.length}</b><span>Total siswa</span></div><div class="stat" style="border-color:#2f6fdb"><b>${L}</b><span>Laki-laki</span></div><div class="stat" style="border-color:#ec4899"><b>${P.length-L}</b><span>Perempuan</span></div><div class="stat" style="border-color:#f59e0b"><b>${k?esc(k):S.kelas.length}</b><span>${k?'Kelas Anda':'Rombel'}</span></div></div>
+ <div class="two"><div class="card"><h3>Jenis kelamin${k?' Kelas '+esc(k):''}</h3><canvas id="c1"></canvas></div><div class="card"><h3>Rekap Kehadiran Bulanan (Otomatis) ${k?'Kelas '+esc(k):'Semua Rombel'}</h3><small style="color:var(--mu)">Bulan ${bl(m)}</small><div style="height:${h}px;margin-top:8px"><canvas id="c3"></canvas></div>${lg}${pc}</div></div>`}
+function chartsInit(){Chart.defaults.color=getComputedStyle(document.body).color;Chart.defaults.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--bd');
  CH.push(new Chart($('#c1'),{type:'pie',data:{labels:['Laki-laki','Perempuan'],datasets:[{data:S.dl,backgroundColor:['#2f6fdb','#ec4899'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom'}}}}));
- bar('#c2',S.dd.map(x=>x.ok&&x.n?Math.round(x.h/x.n*1000)/10:0),c=>{const x=S.dd[c.dataIndex];return x.ok?x.h+' hadir dari '+x.n+' siswa ('+c.raw+'%)':'Belum diisi'});
- bar('#c3',S.dm.map(x=>x.pct),c=>{const x=S.dm[c.dataIndex];return x.tt?x.pct+'% hadir ('+x.h+' dari '+x.tt+' catatan)':'Belum ada data'})}
+ const o=(f,x)=>({indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:f}}},scales:{x}});
+ if(S.dc){const c=S.dc,n=c.H+c.S+c.I+c.A;
+  CH.push(new Chart($('#c3'),{type:'bar',data:{labels:['Hadir','Sakit','Izin','Alpa'],datasets:[{data:[c.H,c.S,c.I,c.A],backgroundColor:['#12a15f','#d99a00','#2f6fdb','#d92d20'],borderRadius:6}]},options:o(x=>x.raw+' catatan ('+(n?Math.round(x.raw/n*1000)/10:0)+'%)',{beginAtZero:true})}))}
+ else CH.push(new Chart($('#c3'),{type:'bar',data:{labels:S.kelas,datasets:[{data:S.dm.map(x=>x.pct),backgroundColor:S.kelas.map(kc),borderRadius:6}]},options:o(x=>{const d=S.dm[x.dataIndex];return d.tt?d.pct+'% hadir ('+d.h+' dari '+d.tt+' catatan)':'Belum ada data'},{min:0,max:100,ticks:{callback:v=>v+'%'}})}))}
 
 /* ---------- presensi ---------- */
 const cur=n=>S.dr[n]??amap(S.pD.slice(0,7)).mp[S.pD+'|'+S.pK+'|'+n]??'';
