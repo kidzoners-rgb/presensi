@@ -89,7 +89,7 @@ html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
-const API='https://script.google.com/macros/s/AKfycbwZIUiCfIckBqFzvk9giBu-EnyKSg_3SrzUHrxFyIcsxM8PPobjzQKI1Zg2yJvKmwU/exec';
+const API='https://script.google.com/macros/s/AKfycbyW1zhg7e2F8-FiDt_JaxKl960rlrSdjiAqF1OuU7CH7OrWe1JMzEjIrrRsrSKwQAAn/exec';
 const S={token:'',user:null,siswa:[],guru:[],kepsek:'',kelas:[],view:'dash'},AT={};let CH=[],role='guru';
 const $=s=>document.querySelector(s),esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pad=n=>String(n).padStart(2,'0'),iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),today=()=>iso(new Date());
@@ -102,7 +102,7 @@ const dt=d=>{if(LIBUR[d])return'm';const w=new Date(d+'T00:00:00').getDay();retu
 const alld=m=>{const n=new Date(+m.slice(0,4),+m.slice(5),0).getDate();return Array.from({length:n},(_,i)=>m+'-'+pad(i+1))};
 const tp=m=>{const y=+m.slice(0,4);return +m.slice(5)>=7?y+'/'+(y+1):(y-1)+'/'+y};
 const COL=['#00c389','#2f6fdb','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#14b8a6','#6366f1'],kc=k=>COL[S.kelas.indexOf(k)%COL.length];
-const sis=k=>S.siswa.filter(s=>s.kelas===k),isA=()=>S.user.role==='admin';
+const sis=k=>S.siswa.filter(s=>s.kelas===k),isA=()=>S.user.role==='admin',isSub=()=>S.user.role==='guru'&&!S.user.wali&&!!S.user.mapel,MP=()=>isSub()?S.user.mapel:'',agOK=s=>!isSub()||!S.user.ag||s.agama.toLowerCase().slice(0,3)===S.user.ag.toLowerCase().slice(0,3),pool=k=>sis(k).filter(agOK),sgn=k=>isSub()?{l:'Guru '+S.user.mapel,g:S.guru.find(x=>x.id===S.user.id)}:{l:'Wali Kelas '+k,g:wali(k)};
 const kep=()=>S.guru.find(g=>g.id===S.kepsek),wali=k=>S.guru.find(g=>g.wali===k&&g.id!==S.kepsek);
 const nip=g=>!g?'-':/\d/.test(g.nip)?'NIP. '+g.nip:g.nip||'-';
 const ls=(k,v)=>{try{return v===undefined?localStorage.getItem(k):v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
@@ -120,18 +120,18 @@ async function names(){try{const n=await api('names');$('#gsel').innerHTML=n.map
 async function loginGo(){const b=$('#lb');b.disabled=true;$('#le').textContent='';
  try{const r=await api('login',{role,id:$('#gsel').value,pin:$('#pin').value});S.token=r.token;ls('tk',r.token);await boot()}catch(e){$('#le').textContent=e.message}b.disabled=false}
 async function boot(){const r=await api('boot');Object.assign(S,r);$('#login').hidden=true;$('#app').hidden=false;
- $('#who').textContent=S.user.nama+(S.user.wali?' · Kelas '+S.user.wali:'');
+ $('#who').textContent=S.user.nama+(S.user.wali?' · Kelas '+S.user.wali:'')+(isSub()?' · '+S.user.mapel:'');
  const m=[['dash','📊','Dashboard'],['pres','✅','Presensi'],...(isA()?[['kepsek','🎓','Data Kepala Sekolah']]:[]),['guru','👥','Data Guru'],['siswa','🧒','Data Siswa'],['dl','📄','Download'],['set','⚙️','Setting']];
- $('#nv').innerHTML=m.map(x=>`<button data-v="${x[0]}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('');go(S.view)}
+ $('#nv').innerHTML=m.map(x=>`<button data-v="${x[0]}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('');if(isSub()&&!S.pK)S.view='pres';go(S.view)}
 function logout(){ls('tk',null);S.token='';S.user=null;location.reload()}
 function menu(o){$('#sb').classList.toggle('open',!!o);$('#ov').hidden=!o}
 
 /* ---------- data presensi ---------- */
 const mOf=()=>S.view==='pres'?(S.pD||today()).slice(0,7):S.view==='dl'?(S.dM||today().slice(0,7)):today().slice(0,7);
 async function loadAtt(m){try{const r=await api('att',{month:m}),j=JSON.stringify(r);if(S['h'+m]!==j){S['h'+m]=j;AT[m]=r;return true}}catch(e){}return false}
-function amap(m){const mp={},fl={};(AT[m]||[]).forEach(x=>{mp[x[0]+'|'+x[1]+'|'+x[2]]=x[3];fl[x[0]+'|'+x[1]]=1});return{mp,fl}}
-function recap(k,m){const{mp,fl}=amap(m),ds=alld(m),tot={H:0,S:0,I:0,A:0};
- const rows=sis(k).map((s,i)=>{const c={H:0,S:0,I:0,A:0},cells=ds.map(d=>{const v=mp[d+'|'+k+'|'+s.nipd]||'';if(v)c[v]++;return v});for(const x in c)tot[x]+=c[x];return{s,i,cells,c,t:c.H+c.S+c.I+c.A}});
+function amap(m,q){const mp={},fl={};(AT[m]||[]).forEach(x=>{if((x[4]||'')!==(q||''))return;mp[x[0]+'|'+x[1]+'|'+x[2]]=x[3];fl[x[0]+'|'+x[1]]=1});return{mp,fl}}
+function recap(k,m){const{mp,fl}=amap(m,MP()),ds=alld(m),tot={H:0,S:0,I:0,A:0};
+ const rows=pool(k).map((s,i)=>{const c={H:0,S:0,I:0,A:0},cells=ds.map(d=>{const v=mp[d+'|'+k+'|'+s.nipd]||'';if(v)c[v]++;return v});for(const x in c)tot[x]+=c[x];return{s,i,cells,c,t:c.H+c.S+c.I+c.A}});
  const f=ds.filter(d=>fl[d+'|'+k]);return{rows,ds,tot,sum:tot.H+tot.S+tot.I+tot.A,last:f.length?f[f.length-1]:ds[ds.length-1]}}
 
 async function go(v){S.view=v;menu(0);document.querySelectorAll('#nv button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
@@ -141,11 +141,11 @@ function render(){CH.forEach(c=>c.destroy());CH=[];const f={dash:vDash,pres:vPre
 setInterval(async()=>{if(!S.user||document.hidden||!['dash','pres','dl'].includes(S.view)||$('#mo').innerHTML)return;if(await loadAtt(mOf()))render()},15000);
 
 /* ---------- dashboard ---------- */
-function vDash(){const t=today(),m=t.slice(0,7),{mp,fl}=amap(m),ds=days(m).filter(d=>d<=t),a=isA(),k=a?'':S.user.wali,P=k?sis(k):S.siswa,L=P.filter(s=>s.jk==='L').length,ks=k?[k]:S.kelas;
+function vDash(){const t=today(),m=t.slice(0,7),{mp,fl}=amap(m,isA()?'':MP()),ds=days(m).filter(d=>d<=t),a=isA(),k=a?'':(isSub()?S.pK:S.user.wali),P=k?pool(k):S.siswa,L=P.filter(s=>s.jk==='L').length,ks=k?[k]:S.kelas;
  S.dl=[L,P.length-L];S.dc=null;
- S.dm=ks.map(x=>{let h=0,tt=0;sis(x).forEach(s=>ds.forEach(d=>{const v=mp[d+'|'+x+'|'+s.nipd];if(v){tt++;if(v==='H')h++}}));return{k:x,h,tt,pct:tt?Math.round(h/tt*1000)/10:0,miss:ds.filter(d=>!fl[d+'|'+x]).length}});
+ S.dm=ks.map(x=>{let h=0,tt=0;pool(x).forEach(s=>ds.forEach(d=>{const v=mp[d+'|'+x+'|'+s.nipd];if(v){tt++;if(v==='H')h++}}));return{k:x,h,tt,pct:tt?Math.round(h/tt*1000)/10:0,miss:ds.filter(d=>!fl[d+'|'+x]).length}});
  let al='',pc='';
- if(k){const c={H:0,S:0,I:0,A:0};sis(k).forEach(s=>ds.forEach(d=>{const v=mp[d+'|'+k+'|'+s.nipd];if(v)c[v]++}));S.dc=c;const n=c.H+c.S+c.I+c.A;
+ if(k){const c={H:0,S:0,I:0,A:0};pool(k).forEach(s=>ds.forEach(d=>{const v=mp[d+'|'+k+'|'+s.nipd];if(v)c[v]++}));S.dc=c;const n=c.H+c.S+c.I+c.A;
   pc=`<p style="margin:10px 0 0">Persentase kehadiran bulan ini: <b>${n?(c.H/n*100).toFixed(1):0}%</b></p>`}
  if(a){const tags=x=>x.map(y=>`<span class="tg">${esc(y)}</span>`).join('');
   if(S.user.def)al+=`<div class="al bl">Anda masih memakai password standar. Ganti di menu Setting.</div>`;
@@ -153,8 +153,8 @@ function vDash(){const t=today(),m=t.slice(0,7),{mp,fl}=amap(m),ds=days(m).filte
   else{const b=S.kelas.filter(x=>!fl[t+'|'+x]);al+=b.length?`<div class="al"><b>Belum mengisi presensi hari ini (${tgl(t)})</b><br>${tags(b)}</div>`:`<div class="al bl">Semua rombel sudah mengisi presensi hari ini.</div>`}
   const bm=S.dm.filter(x=>x.miss>0);if(bm.length)al+=`<div class="al"><b>Presensi bulan ${bl(m)} belum lengkap</b> (hari sekolah yang belum terisi)<br>${tags(bm.map(x=>x.k+': '+x.miss+' hari'))}</div>`}
  const lg=k?'':'<div class="lg">'+S.kelas.map(x=>`<span><i style="background:${kc(x)}"></i>${esc(x)}</span>`).join('')+'</div>',h=k?200:S.kelas.length*30+70;
- return al+`<div class="grid"><div class="stat"><b>${P.length}</b><span>Total siswa</span></div><div class="stat" style="border-color:#2f6fdb"><b>${L}</b><span>Laki-laki</span></div><div class="stat" style="border-color:#ec4899"><b>${P.length-L}</b><span>Perempuan</span></div><div class="stat" style="border-color:#f59e0b"><b>${k?esc(k):S.kelas.length}</b><span>${k?'Kelas Anda':'Rombel'}</span></div></div>
- <div class="two"><div class="card"><h3>Jenis kelamin${k?' Kelas '+esc(k):''}</h3><canvas id="c1"></canvas></div><div class="card"><h3>Rekap Kehadiran Bulanan (Otomatis) ${k?'Kelas '+esc(k):'Semua Rombel'}</h3><small style="color:var(--mu)">Bulan ${bl(m)}</small><div style="height:${h}px;margin-top:8px"><canvas id="c3"></canvas></div>${lg}${pc}</div></div>`}
+ return al+`<div class="grid"><div class="stat"><b>${P.length}</b><span>Total siswa</span></div><div class="stat" style="border-color:#2f6fdb"><b>${L}</b><span>Laki-laki</span></div><div class="stat" style="border-color:#ec4899"><b>${P.length-L}</b><span>Perempuan</span></div><div class="stat" style="border-color:#f59e0b"><b>${k?esc(k):S.kelas.length}</b><span>${k?(isSub()?'Kelas dipilih':'Kelas Anda'):'Rombel'}</span></div></div>
+ <div class="two"><div class="card"><h3>Jenis kelamin${k?' Kelas '+esc(k):''}</h3><canvas id="c1"></canvas></div><div class="card"><h3>Rekap Kehadiran Bulanan (Otomatis) ${k?'Kelas '+esc(k):'Semua Rombel'}${isSub()?' - '+esc(S.user.mapel):''}</h3><small style="color:var(--mu)">Bulan ${bl(m)}</small><div style="height:${h}px;margin-top:8px"><canvas id="c3"></canvas></div>${lg}${pc}</div></div>`}
 function chartsInit(){Chart.defaults.color=getComputedStyle(document.body).color;Chart.defaults.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--bd');
  CH.push(new Chart($('#c1'),{type:'pie',data:{labels:['Laki-laki','Perempuan'],datasets:[{data:S.dl,backgroundColor:['#2f6fdb','#ec4899'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom'}}}}));
  const o=(f,x)=>({indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:f}}},scales:{x}});
@@ -163,48 +163,51 @@ function chartsInit(){Chart.defaults.color=getComputedStyle(document.body).color
  else CH.push(new Chart($('#c3'),{type:'bar',data:{labels:S.kelas,datasets:[{data:S.dm.map(x=>x.pct),backgroundColor:S.kelas.map(kc),borderRadius:6}]},options:o(x=>{const d=S.dm[x.dataIndex];return d.tt?d.pct+'% hadir ('+d.h+' dari '+d.tt+' catatan)':'Belum ada data'},{min:0,max:100,ticks:{callback:v=>v+'%'}})}))}
 
 /* ---------- presensi ---------- */
-const cur=n=>S.dr[n]??amap(S.pD.slice(0,7)).mp[S.pD+'|'+S.pK+'|'+n]??'';
-function vPres(){if(!S.pD)S.pD=today();if(!S.pK||isA()&&!S.kelas.includes(S.pK))S.pK=isA()?S.kelas[0]:S.user.wali;
- if(!S.pK)return'<div class="card">Akun Anda belum ditetapkan sebagai wali kelas, jadi belum bisa mengisi presensi. Hubungi admin.</div>';
- const key=S.pD+'|'+S.pK;if(S.dk!==key){S.dk=key;S.dr={}}
- return`<div class="card"><div class="row">${isA()?`<select onchange="S.pK=this.value;render()">${S.kelas.map(k=>`<option ${k==S.pK?'selected':''}>${k}</option>`).join('')}</select>`:`<span class="chip">Kelas ${esc(S.pK)}</span>`}
+const pList=()=>pool(S.pK),cur=n=>S.dr[n]??amap(S.pD.slice(0,7),MP()).mp[S.pD+'|'+S.pK+'|'+n]??'';
+function setK2(k){S.pK=k;render()}function pickK(){S.pK='';render()}
+function vPres(){if(!S.pD)S.pD=today();
+ if(isSub()){if(!S.pK)return`<div class="card"><h3>Pilih kelas</h3><p style="color:var(--mu)">Anda mengisi presensi mata pelajaran <b>${esc(S.user.mapel)}</b>. Pilih kelas yang sedang Anda ajar agar tidak salah input.</p><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr))">${S.kelas.map(k=>`<button class="btn sec" style="padding:16px 8px" onclick="setK2('${esc(k)}')"><b style="font-size:18px">${esc(k)}</b><br><small>${pool(k).length} siswa</small></button>`).join('')}</div></div>`}
+ else if(isA()){if(!S.pK||!S.kelas.includes(S.pK))S.pK=S.kelas[0]}else S.pK=S.user.wali;
+ if(!S.pK)return'<div class="card">Akun Anda belum ditetapkan sebagai wali kelas atau guru mata pelajaran, jadi belum bisa mengisi presensi. Hubungi admin.</div>';
+ const key=S.pD+'|'+S.pK+'|'+MP();if(S.dk!==key){S.dk=key;S.dr={}}
+ return`<div class="card"><div class="row">${isA()?`<select onchange="S.pK=this.value;render()">${S.kelas.map(k=>`<option ${k==S.pK?'selected':''}>${k}</option>`).join('')}</select>`:`<span class="chip">Kelas ${esc(S.pK)}${isSub()?' · '+esc(S.user.mapel):''}</span>`}${isSub()?'<button class="btn sec sm" onclick="pickK()">Ganti kelas</button>':''}
  <input type="date" value="${S.pD}" onchange="chD(this.value)"><button class="btn sec" onclick="allH()">Semua hadir</button><button class="btn" id="sv" onclick="askSave()">Simpan presensi</button></div>
- ${wk(S.pD)?'':'<div class="al">Tanggal ini akhir pekan.</div>'}<div id="ps" style="color:var(--mu);font-size:13px"></div><div id="pl"></div></div>`}
+ ${wk(S.pD)?'':'<div class="al">Tanggal ini akhir pekan.</div>'}${isSub()&&S.user.ag?`<div style="color:var(--mu);font-size:13px;margin-bottom:8px">Daftar hanya berisi siswa beragama ${esc(S.user.ag)}.</div>`:''}<div id="ps" style="color:var(--mu);font-size:13px"></div><div id="pl"></div></div>`}
 async function chD(v){if(!v)return;S.pD=v;await loadAtt(v.slice(0,7));render()}
-function pl(){if(!$('#pl'))return;const c={H:0,S:0,I:0,A:0,'':0};
- $('#pl').innerHTML=sis(S.pK).map((s,i)=>{const v=cur(s.nipd);c[v]++;return`<div class="st"><span style="width:26px;color:var(--mu)">${i+1}</span><div class="n">${esc(s.nama)}<br><small>${s.nisn}</small></div><div class="mk">${['H','S','I','A'].map(x=>`<button class="${x}${v===x?' on':''}" onclick="mk('${s.nipd}','${x}')">${x}</button>`).join('')}</div></div>`}).join('');
+function pl(){if(!$('#pl'))return;const c={H:0,S:0,I:0,A:0,'':0},L=pList();
+ $('#pl').innerHTML=L.length?L.map((s,i)=>{const v=cur(s.nipd);c[v]++;return`<div class="st"><span style="width:26px;color:var(--mu)">${i+1}</span><div class="n">${esc(s.nama)}<br><small>${s.nisn}</small></div><div class="mk">${['H','S','I','A'].map(x=>`<button class="${x}${v===x?' on':''}" onclick="mk('${s.nipd}','${x}')">${x}</button>`).join('')}</div></div>`}).join(''):'<div style="padding:14px 0;color:var(--mu)">Tidak ada siswa yang sesuai di kelas ini.</div>';
  $('#ps').textContent=`Hadir ${c.H} · Sakit ${c.S} · Izin ${c.I} · Alpa ${c.A} · Belum ditandai ${c['']}`}
-function fab(){if(S.view!=='pres')return go('pres');if(!S.pK)return toast('Akun Anda belum ditetapkan sebagai wali kelas.',1);askSave()}
-function mk(n,x){S.dr[n]=x;pl()}function allH(){sis(S.pK).forEach(s=>S.dr[s.nipd]='H');pl()}
-function askSave(){const c={H:0,S:0,I:0,A:0};let u=0;S.pm={};sis(S.pK).forEach(s=>{const v=cur(s.nipd);if(v){c[v]++;S.pm[s.nipd]=v}else u++});
+function fab(){if(S.view!=='pres')return go('pres');if(!S.pK)return toast(isSub()?'Pilih kelas terlebih dahulu.':'Akun Anda belum ditetapkan sebagai wali kelas.',1);askSave()}
+function mk(n,x){S.dr[n]=x;pl()}function allH(){pList().forEach(s=>S.dr[s.nipd]='H');pl()}
+function askSave(){const L=pList(),c={H:0,S:0,I:0,A:0};let u=0;S.pm={};if(!L.length)return toast('Tidak ada siswa untuk disimpan.',1);L.forEach(s=>{const v=cur(s.nipd);if(v){c[v]++;S.pm[s.nipd]=v}else u++});
  if(u)return toast('Masih '+u+' siswa belum ditandai.',1);
- modal(`<h3>Simpan presensi?</h3><p>Kelas <b>${esc(S.pK)}</b>, ${tgl(S.pD)}</p><p>Hadir <b>${c.H}</b> · Sakit <b>${c.S}</b> · Izin <b>${c.I}</b> · Alpa <b>${c.A}</b></p><div class="row"><button class="btn sec" onclick="closeM()">Batal</button><button class="btn" id="ys" onclick="doSave()">Ya, simpan</button></div>`)}
-async function doSave(){$('#ys').disabled=true;try{await api('save',{kelas:S.pK,tanggal:S.pD,marks:S.pm});S.dr={};await loadAtt(S.pD.slice(0,7));closeM();toast('Presensi tersimpan.');render()}catch(e){closeM();toast(e.message,1)}}
+ modal(`<h3>Simpan presensi?</h3><p>Kelas <b>${esc(S.pK)}</b>${isSub()?' · <b>'+esc(S.user.mapel)+'</b>':''}<br>${tgl(S.pD)}</p><p>Hadir <b>${c.H}</b> · Sakit <b>${c.S}</b> · Izin <b>${c.I}</b> · Alpa <b>${c.A}</b></p><div class="row"><button class="btn sec" onclick="closeM()">Batal</button><button class="btn" id="ys" onclick="doSave()">Ya, simpan</button></div>`)}
+async function doSave(){$('#ys').disabled=true;try{await api('save',{kelas:S.pK,tanggal:S.pD,marks:S.pm,mapel:MP()});S.dr={};await loadAtt(S.pD.slice(0,7));closeM();toast('Presensi tersimpan.');render()}catch(e){closeM();toast(e.message,1)}}
 
 /* ---------- data ---------- */
 function vKep(){const k=kep();return`<div class="card"><h3>Kepala sekolah saat ini</h3><p>${k?`<b>${esc(k.nama)}</b><br>${esc(nip(k))}`:'Belum dipilih.'}</p><div class="row"><select id="ks">${S.guru.map(g=>`<option value="${esc(g.id)}" ${g.id===S.kepsek?'selected':''}>${esc(g.nama)}</option>`).join('')}</select><button class="btn" onclick="setK()">Simpan</button></div><small style="color:var(--mu)">Nama yang dipilih tidak muncul lagi di Data Guru dan pilihan login guru.</small></div>`}
 async function setK(){try{await api('setKepsek',{id:$('#ks').value});await boot();toast('Kepala sekolah disimpan.')}catch(e){toast(e.message,1)}}
 function vGuru(){const a=isA(),G=S.guru.filter(g=>g.id!==S.kepsek);
- return`<div class="card">${a?'<div class="row"><button class="btn sec sm" onclick="resetPin(\'all\')">Reset PIN semua guru</button></div>':''}<div class="tw"><table><tr><th>No</th><th>Nama</th><th>JK</th><th>NIP</th><th>Jabatan</th><th>Wali kelas</th><th>Mata pelajaran</th>${a?'<th></th>':''}</tr>${G.map((g,i)=>`<tr><td>${i+1}</td><td>${esc(g.nama)}</td><td>${esc(g.jk)}</td><td>${esc(g.nip)}</td><td>${esc(g.jab)}</td>${a?`<td><select id="w${g.row}"><option value="">-</option>${S.kelas.map(k=>`<option ${k===g.wali?'selected':''}>${k}</option>`).join('')}</select></td><td><input id="m${g.row}" value="${esc(g.mapel)}" style="width:160px"></td><td><button class="btn sm" onclick="updG(${g.row})">Simpan</button> <button class="btn sec sm" onclick="resetPin('${esc(g.id)}')">Reset PIN</button></td>`:`<td>${esc(g.wali||'-')}</td><td>${esc(g.mapel||'-')}</td>`}</tr>`).join('')}</table></div></div>`}
+ return`<div class="card">${a?'<div class="row"><button class="btn sec sm" onclick="resetPin(\'all\')">Reset PIN semua guru</button></div>':''}<div class="tw"><table><tr><th>No</th><th>Nama</th><th>JK</th><th>NIP</th><th>Jabatan</th><th>Wali kelas</th><th>Mata pelajaran</th>${a?'<th></th>':''}</tr>${G.map((g,i)=>`<tr><td>${i+1}</td><td>${esc(g.nama)}</td><td>${esc(g.jk)}</td><td>${esc(g.nip)}</td><td>${esc(g.jab)}</td>${a?`<td><select id="w${g.row}"><option value="">-</option>${S.kelas.map(k=>`<option ${k===g.wali?'selected':''}>${k}</option>`).join('')}</select></td><td><input id="m${g.row}" value="${esc(g.mapel)}" placeholder="${esc(g.jab.replace(/^Guru\s+/i,''))}" style="width:160px"></td><td><button class="btn sm" onclick="updG(${g.row})">Simpan</button> <button class="btn sec sm" onclick="resetPin('${esc(g.id)}')">Reset PIN</button></td>`:`<td>${esc(g.wali||'-')}</td><td>${esc(g.mapel||'-')}</td>`}</tr>`).join('')}</table></div></div>`}
 async function updG(r){try{await api('updGuru',{row:r,wali:$('#w'+r).value,mapel:$('#m'+r).value});S.guru=(await api('boot')).guru;toast('Data guru disimpan ke spreadsheet.')}catch(e){toast(e.message,1)}}
 async function resetPin(id){if(!confirm(id==='all'?'Kembalikan PIN semua guru ke PIN standar?':'Kembalikan PIN guru ini ke PIN standar?'))return;try{await api('resetPin',{id});toast('PIN dikembalikan ke standar (123456).')}catch(e){toast(e.message,1)}}
 function vSis(){const q=(S.q||'').toLowerCase(),f=S.fk||'';const L=S.siswa.filter(s=>(!f||s.kelas===f)&&(!q||(s.nama+s.nisn+s.nipd).toLowerCase().includes(q)));
  return`<div class="card"><div class="row"><input placeholder="Cari nama, NISN, NIPD" value="${esc(S.q||'')}" oninput="S.q=this.value;clearTimeout(S.tq);S.tq=setTimeout(()=>{render();const i=document.querySelector('.card input');i.focus();i.setSelectionRange(99,99)},300)"><select onchange="S.fk=this.value;render()"><option value="">Semua kelas</option>${S.kelas.map(k=>`<option ${k===f?'selected':''}>${k}</option>`).join('')}</select><span class="chip">${L.length} siswa</span></div><div class="tw"><table><tr><th>No</th><th>NIPD</th><th>NISN</th><th>Nama</th><th>JK</th><th>Tempat lahir</th><th>Tanggal lahir</th><th>Agama</th><th>Ayah</th><th>Ibu</th><th>Kelas</th></tr>${L.map((s,i)=>`<tr><td>${i+1}</td><td>${s.nipd}</td><td>${s.nisn}</td><td>${esc(s.nama)}</td><td>${s.jk}</td><td>${esc(s.tl)}</td><td>${esc(s.tgl)}</td><td>${esc(s.agama)}</td><td>${esc(s.ayah)}</td><td>${esc(s.ibu)}</td><td>${s.kelas}</td></tr>`).join('')}</table></div></div>`}
 
 /* ---------- download ---------- */
-function vDl(){if(!S.dM)S.dM=today().slice(0,7);if(!S.dK||!S.kelas.includes(S.dK))S.dK=S.user.wali||S.kelas[0];
- const R=recap(S.dK,S.dM),k=kep(),w=wali(S.dK),pct=R.sum?(R.tot.H/R.sum*100).toFixed(1):'0';
+function vDl(){if(!S.dM)S.dM=today().slice(0,7);if(!S.dK||!S.kelas.includes(S.dK))S.dK=S.user.wali||S.pK||S.kelas[0];
+ const R=recap(S.dK,S.dM),k=kep(),sg=sgn(S.dK),pct=R.sum?(R.tot.H/R.sum*100).toFixed(1):'0';
  return`<div class="card"><div class="row"><input type="month" value="${S.dM}" onchange="chM(this.value)"><select onchange="S.dK=this.value;render()">${S.kelas.map(x=>`<option ${x===S.dK?'selected':''}>${x}</option>`).join('')}</select><button class="btn" onclick="pdf()">Unduh PDF</button></div>
- <div class="rep"><b>Laporan Presensi Bulan ${bl(S.dM)} Siswa Kelas ${esc(S.dK)}</b><b style="font-weight:500">SD Negeri 101731 - TP. ${tp(S.dM)}</b><hr></div>
+ <div class="rep"><b>Laporan Presensi Bulan ${bl(S.dM)} Siswa Kelas ${esc(S.dK)}${isSub()?' - '+esc(S.user.mapel):''}</b><b style="font-weight:500">SD Negeri 101731 - TP. ${tp(S.dM)}</b><hr></div>
  <div class="tw"><table class="rc"><tr><th>No</th><th class="l">Nama</th><th>NISN</th><th>JK</th>${R.ds.map(d=>`<th class="${dt(d)}">${+d.slice(8)}</th>`).join('')}<th>H</th><th>S</th><th>I</th><th>A</th><th>Total</th></tr>
  ${R.rows.map(r=>`<tr><td>${r.i+1}</td><td class="l">${esc(r.s.nama)}</td><td>${r.s.nisn}</td><td>${r.s.jk}</td>${r.cells.map((c,j)=>`<td class="${dt(R.ds[j])}">${c}</td>`).join('')}<td>${r.c.H}</td><td>${r.c.S}</td><td>${r.c.I}</td><td>${r.c.A}</td><td>${r.t}</td></tr>`).join('')}
  <tr style="font-weight:700"><td></td><td class="l">Jumlah</td><td></td><td></td>${R.ds.map(d=>'<td class="'+dt(d)+'"></td>').join('')}<td>${R.tot.H}</td><td>${R.tot.S}</td><td>${R.tot.I}</td><td>${R.tot.A}</td><td>${R.sum}</td></tr></table></div>
- <div class="sg"><div>Diketahui,<br>Kepala Sekolah<br><br><br><b>${esc(k?k.nama:'-')}</b><br>${esc(nip(k))}</div><div>Sunggal, ${tgl(R.last)}<br>Wali Kelas ${esc(S.dK)}<br><br><br><b>${esc(w?w.nama:'-')}</b><br>${esc(nip(w))}</div></div></div>`}
+ <div class="sg"><div>Diketahui,<br>Kepala Sekolah<br><br><br><b>${esc(k?k.nama:'-')}</b><br>${esc(nip(k))}</div><div>Sunggal, ${tgl(R.last)}<br>${esc(sg.l)}<br><br><br><b>${esc(sg.g?sg.g.nama:'-')}</b><br>${esc(nip(sg.g))}</div></div></div>`}
 async function chM(v){if(!v)return;S.dM=v;await loadAtt(v);render()}
-function pdf(){const{jsPDF}=window.jspdf,W=330,H=215,d=new jsPDF({orientation:'landscape',unit:'mm',format:[W,H]}),k=S.dK,m=S.dM,R=recap(k,m),kp=kep(),w=wali(k);
+function pdf(){const{jsPDF}=window.jspdf,W=330,H=215,d=new jsPDF({orientation:'landscape',unit:'mm',format:[W,H]}),k=S.dK,m=S.dM,R=recap(k,m),kp=kep(),sg=sgn(k);
  /* F4 landscape (330 x 215 mm), dipaksa 1 halaman: tinggi baris menyesuaikan jumlah siswa */
  const top=28,FT=42,n=R.rows.length+2,avail=H-top-10-FT,tx=f=>f*.4057;let fs=7,pv=(avail/n-tx(fs))/2;if(pv<.45){fs=6;pv=(avail/n-tx(fs))/2}pv=Math.max(.2,Math.min(pv,1.8));
- d.setFont('helvetica','bold').setFontSize(13).setTextColor(20,33,61).text('Laporan Presensi Bulan '+bl(m)+' Siswa Kelas '+k,W/2,14,{align:'center'});
+ d.setFont('helvetica','bold').setFontSize(13).setTextColor(20,33,61).text('Laporan Presensi Bulan '+bl(m)+' Siswa Kelas '+k+(isSub()?' - '+S.user.mapel:''),W/2,14,{align:'center'});
  d.setFontSize(11).setFont('helvetica','normal').text('SD Negeri 101731 - TP. '+tp(m),W/2,20,{align:'center'});d.setDrawColor(20,33,61).setLineWidth(.6).line(10,23,W-10,23);
  d.autoTable({startY:top,margin:{left:10,right:10,bottom:10},theme:'grid',tableWidth:'auto',
   head:[['No','Nama','NISN','JK',...R.ds.map(x=>String(+x.slice(8))),'H','S','I','A','Total']],
@@ -216,9 +219,9 @@ function pdf(){const{jsPDF}=window.jspdf,W=330,H=215,d=new jsPDF({orientation:'l
   didParseCell:h=>{const j=h.column.index-4;if(j<0||j>=R.ds.length)return;const t=dt(R.ds[j]);if(t==='m'){h.cell.styles.fillColor=[253,226,224];h.cell.styles.textColor=[180,35,24]}}});
  let y=Math.min(d.lastAutoTable.finalY+10,H-10-30);const xr=W-95;
  d.setFont('helvetica','normal').setFontSize(9).setTextColor(20,33,61);
- d.text('Diketahui,',30,y).text('Kepala Sekolah',30,y+5).text('Sunggal, '+tgl(R.last),xr,y).text('Wali Kelas '+k,xr,y+5);
- d.setFont('helvetica','bold').text(kp?kp.nama:'-',30,y+25).text(w?w.nama:'-',xr,y+25);
- d.setFont('helvetica','normal').text(nip(kp),30,y+30).text(nip(w),xr,y+30);d.save('Presensi-'+k+'-'+m+'.pdf')}
+ d.text('Diketahui,',30,y).text('Kepala Sekolah',30,y+5).text('Sunggal, '+tgl(R.last),xr,y).text(sg.l,xr,y+5);
+ d.setFont('helvetica','bold').text(kp?kp.nama:'-',30,y+25).text(sg.g?sg.g.nama:'-',xr,y+25);
+ d.setFont('helvetica','normal').text(nip(kp),30,y+30).text(nip(sg.g),xr,y+30);d.save('Presensi-'+k+'-'+m+'.pdf')}
 
 /* ---------- setting ---------- */
 function vSet(){const a=isA();return`<div class="card" style="max-width:420px"><h3>Ganti ${a?'password':'PIN'}</h3><div class="row"><input id="po" type="password" placeholder="${a?'Password':'PIN'} lama" style="flex:1"></div><div class="row"><input id="pn" type="password" placeholder="${a?'Password baru (min. 6 karakter)':'PIN baru (4-8 angka)'}" ${a?'':'inputmode="numeric"'} style="flex:1"></div><button class="btn" onclick="chPin()">Simpan</button><p style="color:var(--mu);font-size:13px">${a?'':'PIN standar semua guru: 123456. '}Setelah diganti, gunakan yang baru saat masuk.</p></div>`}
