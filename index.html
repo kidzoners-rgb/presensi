@@ -57,7 +57,11 @@ th,td{border-bottom:1px solid var(--bd);padding:8px 10px;text-align:left;white-s
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--nav);color:#fff;padding:10px 18px;border-radius:12px;z-index:60}
 .rep{text-align:center;margin-bottom:10px}.rep b{display:block;font-size:16px}.rep hr{border:0;border-top:2px solid var(--tx);margin:8px 0}
 .sg{display:flex;justify-content:space-between;margin-top:18px;gap:16px;flex-wrap:wrap}
-@media(max-width:899px){#sb{transform:translateX(-100%)}#sb.open{transform:none}.main{margin-left:0}.mb{display:block}.two{grid-template-columns:1fr}#v{padding:14px}}
+.fab{display:none;position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:25;background:var(--ac);color:var(--act);border:0;border-radius:999px;padding:14px 28px;font-weight:700;font-size:16px;box-shadow:0 6px 20px #0000004d;cursor:pointer;align-items:center;gap:8px}
+.rc .m{background:#fde2e0;color:#b42318}.rc .s{background:#fff3c4;color:#7a5200}
+html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc .s{background:#4d3c0a;color:#ffd27a}
+.lgd{font-size:12px;color:var(--mu);margin:8px 0}.lgd i{display:inline-block;width:11px;height:11px;border-radius:3px;margin:0 4px 0 10px;vertical-align:-1px}.lgd i:first-child{margin-left:0}
+@media(max-width:899px){.fab{display:flex}#sb{transform:translateX(-100%)}#sb.open{transform:none}.main{margin-left:0}.mb{display:block}.two{grid-template-columns:1fr}#v{padding:14px 14px 96px}}
 </style>
 </head>
 <body>
@@ -77,6 +81,7 @@ th,td{border-bottom:1px solid var(--bd);padding:8px 10px;text-align:left;white-s
   <div class="sf"><button onclick="theme()">🌙 Mode gelap</button><button class="out" onclick="logout()">⎋ Keluar</button></div>
  </aside>
  <div class="ov" id="ov" hidden onclick="menu(0)"></div>
+ <button class="fab" id="fab" onclick="fab()">✅ Absen</button>
  <div class="main"><header><button class="mb" onclick="menu(1)">☰</button><h2 id="ttl"></h2><span class="chip" id="who"></span></header><main id="v"></main></div>
 </div>
 <div id="mo"></div><div id="toast" hidden></div>
@@ -92,6 +97,9 @@ const BLN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','S
 const bl=m=>BLN[+m.slice(5,7)-1]+' '+m.slice(0,4),tgl=d=>+d.slice(8)+' '+BLN[+d.slice(5,7)-1]+' '+d.slice(0,4);
 const wk=d=>{const w=new Date(d+'T00:00:00').getDay();return w>0&&w<6};
 const days=m=>{const n=new Date(+m.slice(0,4),+m.slice(5),0).getDate(),r=[];for(let i=1;i<=n;i++){const d=m+'-'+pad(i);if(wk(d))r.push(d)}return r};
+const LIBUR={/* tanggal merah: '2026-12-25':'Hari Natal' */};
+const dt=d=>{if(LIBUR[d])return'm';const w=new Date(d+'T00:00:00').getDay();return w===0?'m':w===6?'s':''};
+const alld=m=>{const n=new Date(+m.slice(0,4),+m.slice(5),0).getDate();return Array.from({length:n},(_,i)=>m+'-'+pad(i+1))};
 const tp=m=>{const y=+m.slice(0,4);return +m.slice(5)>=7?y+'/'+(y+1):(y-1)+'/'+y};
 const COL=['#00c389','#2f6fdb','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#14b8a6','#6366f1'],kc=k=>COL[S.kelas.indexOf(k)%COL.length];
 const sis=k=>S.siswa.filter(s=>s.kelas===k),isA=()=>S.user.role==='admin';
@@ -122,12 +130,12 @@ function menu(o){$('#sb').classList.toggle('open',!!o);$('#ov').hidden=!o}
 const mOf=()=>S.view==='pres'?(S.pD||today()).slice(0,7):S.view==='dl'?(S.dM||today().slice(0,7)):today().slice(0,7);
 async function loadAtt(m){try{const r=await api('att',{month:m}),j=JSON.stringify(r);if(S['h'+m]!==j){S['h'+m]=j;AT[m]=r;return true}}catch(e){}return false}
 function amap(m){const mp={},fl={};(AT[m]||[]).forEach(x=>{mp[x[0]+'|'+x[1]+'|'+x[2]]=x[3];fl[x[0]+'|'+x[1]]=1});return{mp,fl}}
-function recap(k,m){const{mp,fl}=amap(m),ds=days(m),tot={H:0,S:0,I:0,A:0};
+function recap(k,m){const{mp,fl}=amap(m),ds=alld(m),tot={H:0,S:0,I:0,A:0};
  const rows=sis(k).map((s,i)=>{const c={H:0,S:0,I:0,A:0},cells=ds.map(d=>{const v=mp[d+'|'+k+'|'+s.nipd]||'';if(v)c[v]++;return v});for(const x in c)tot[x]+=c[x];return{s,i,cells,c,t:c.H+c.S+c.I+c.A}});
  const f=ds.filter(d=>fl[d+'|'+k]);return{rows,ds,tot,sum:tot.H+tot.S+tot.I+tot.A,last:f.length?f[f.length-1]:ds[ds.length-1]}}
 
 async function go(v){S.view=v;menu(0);document.querySelectorAll('#nv button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
- $('#ttl').textContent={dash:'Dashboard',pres:'Presensi Harian',kepsek:'Data Kepala Sekolah',guru:'Data Guru',siswa:'Data Siswa',dl:'Download Rekap',set:'Setting'}[v];
+ $('#fab').textContent=v==='pres'?'💾 Simpan':'✅ Absen';$('#ttl').textContent={dash:'Dashboard',pres:'Presensi Harian',kepsek:'Data Kepala Sekolah',guru:'Data Guru',siswa:'Data Siswa',dl:'Download Rekap',set:'Setting'}[v];
  if(['dash','pres','dl'].includes(v))await loadAtt(mOf());render()}
 function render(){CH.forEach(c=>c.destroy());CH=[];const f={dash:vDash,pres:vPres,kepsek:vKep,guru:vGuru,siswa:vSis,dl:vDl,set:vSet}[S.view];$('#v').innerHTML=f();({dash:chartsInit,pres:pl}[S.view]||(()=>0))()}
 setInterval(async()=>{if(!S.user||document.hidden||!['dash','pres','dl'].includes(S.view)||$('#mo').innerHTML)return;if(await loadAtt(mOf()))render()},15000);
@@ -166,6 +174,7 @@ async function chD(v){if(!v)return;S.pD=v;await loadAtt(v.slice(0,7));render()}
 function pl(){if(!$('#pl'))return;const c={H:0,S:0,I:0,A:0,'':0};
  $('#pl').innerHTML=sis(S.pK).map((s,i)=>{const v=cur(s.nipd);c[v]++;return`<div class="st"><span style="width:26px;color:var(--mu)">${i+1}</span><div class="n">${esc(s.nama)}<br><small>${s.nisn}</small></div><div class="mk">${['H','S','I','A'].map(x=>`<button class="${x}${v===x?' on':''}" onclick="mk('${s.nipd}','${x}')">${x}</button>`).join('')}</div></div>`}).join('');
  $('#ps').textContent=`Hadir ${c.H} · Sakit ${c.S} · Izin ${c.I} · Alpa ${c.A} · Belum ditandai ${c['']}`}
+function fab(){if(S.view!=='pres')return go('pres');if(!S.pK)return toast('Akun Anda belum ditetapkan sebagai wali kelas.',1);askSave()}
 function mk(n,x){S.dr[n]=x;pl()}function allH(){sis(S.pK).forEach(s=>S.dr[s.nipd]='H');pl()}
 function askSave(){const c={H:0,S:0,I:0,A:0};let u=0;S.pm={};sis(S.pK).forEach(s=>{const v=cur(s.nipd);if(v){c[v]++;S.pm[s.nipd]=v}else u++});
  if(u)return toast('Masih '+u+' siswa belum ditandai.',1);
@@ -187,22 +196,29 @@ function vDl(){if(!S.dM)S.dM=today().slice(0,7);if(!S.dK||!S.kelas.includes(S.dK
  const R=recap(S.dK,S.dM),k=kep(),w=wali(S.dK),pct=R.sum?(R.tot.H/R.sum*100).toFixed(1):'0';
  return`<div class="card"><div class="row"><input type="month" value="${S.dM}" onchange="chM(this.value)"><select onchange="S.dK=this.value;render()">${S.kelas.map(x=>`<option ${x===S.dK?'selected':''}>${x}</option>`).join('')}</select><button class="btn" onclick="pdf()">Unduh PDF</button></div>
  <div class="rep"><b>Laporan Presensi Bulan ${bl(S.dM)} Siswa Kelas ${esc(S.dK)}</b><b style="font-weight:500">SD Negeri 101731 - TP. ${tp(S.dM)}</b><hr></div>
- <div class="tw"><table class="rc"><tr><th>No</th><th class="l">Nama</th><th>NISN</th><th>JK</th>${R.ds.map(d=>`<th>${+d.slice(8)}</th>`).join('')}<th>H</th><th>S</th><th>I</th><th>A</th><th>Total</th></tr>
- ${R.rows.map(r=>`<tr><td>${r.i+1}</td><td class="l">${esc(r.s.nama)}</td><td>${r.s.nisn}</td><td>${r.s.jk}</td>${r.cells.map(c=>`<td>${c}</td>`).join('')}<td>${r.c.H}</td><td>${r.c.S}</td><td>${r.c.I}</td><td>${r.c.A}</td><td>${r.t}</td></tr>`).join('')}
- <tr style="font-weight:700"><td></td><td class="l">Jumlah</td><td></td><td></td>${R.ds.map(()=>'<td></td>').join('')}<td>${R.tot.H}</td><td>${R.tot.S}</td><td>${R.tot.I}</td><td>${R.tot.A}</td><td>${R.sum}</td></tr></table></div>
+ <div class="tw"><table class="rc"><tr><th>No</th><th class="l">Nama</th><th>NISN</th><th>JK</th>${R.ds.map(d=>`<th class="${dt(d)}">${+d.slice(8)}</th>`).join('')}<th>H</th><th>S</th><th>I</th><th>A</th><th>Total</th></tr>
+ ${R.rows.map(r=>`<tr><td>${r.i+1}</td><td class="l">${esc(r.s.nama)}</td><td>${r.s.nisn}</td><td>${r.s.jk}</td>${r.cells.map((c,j)=>`<td class="${dt(R.ds[j])}">${c}</td>`).join('')}<td>${r.c.H}</td><td>${r.c.S}</td><td>${r.c.I}</td><td>${r.c.A}</td><td>${r.t}</td></tr>`).join('')}
+ <tr style="font-weight:700"><td></td><td class="l">Jumlah</td><td></td><td></td>${R.ds.map(d=>'<td class="'+dt(d)+'"></td>').join('')}<td>${R.tot.H}</td><td>${R.tot.S}</td><td>${R.tot.I}</td><td>${R.tot.A}</td><td>${R.sum}</td></tr></table></div>
+ <div class="lgd"><i style="background:#f4a8a1"></i>Minggu / tanggal merah<i style="background:#f6d56a"></i>Sabtu</div>
  <p>Total kehadiran: <b>${pct}%</b> (Hadir ${R.tot.H} dari ${R.sum} catatan)</p>
  <div class="sg"><div>Diketahui,<br>Kepala Sekolah<br><br><br><b>${esc(k?k.nama:'-')}</b><br>${esc(nip(k))}</div><div>Sunggal, ${tgl(R.last)}<br>Wali Kelas ${esc(S.dK)}<br><br><br><b>${esc(w?w.nama:'-')}</b><br>${esc(nip(w))}</div></div></div>`}
 async function chM(v){if(!v)return;S.dM=v;await loadAtt(v);render()}
-function pdf(){const{jsPDF}=window.jspdf,d=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'}),k=S.dK,m=S.dM,R=recap(k,m),W=d.internal.pageSize.getWidth(),H=d.internal.pageSize.getHeight();
- d.setFont('helvetica','bold').setFontSize(13).text('Laporan Presensi Bulan '+bl(m)+' Siswa Kelas '+k,W/2,14,{align:'center'});
- d.setFontSize(11).text('SD Negeri 101731 - TP. '+tp(m),W/2,20,{align:'center'});d.setLineWidth(.6).line(10,23,W-10,23);
- d.autoTable({startY:27,margin:{left:10,right:10},head:[['No','Nama','NISN','JK',...R.ds.map(x=>String(+x.slice(8))),'H','S','I','A','Total']],
+function pdf(){const{jsPDF}=window.jspdf,W=330,H=215,d=new jsPDF({orientation:'landscape',unit:'mm',format:[W,H]}),k=S.dK,m=S.dM,R=recap(k,m),kp=kep(),w=wali(k),p=R.sum?(R.tot.H/R.sum*100).toFixed(1):'0';
+ /* F4 landscape (330 x 215 mm), dipaksa 1 halaman: tinggi baris menyesuaikan jumlah siswa */
+ const top=28,FT=54,n=R.rows.length+2,avail=H-top-10-FT,tx=f=>f*.4057;let fs=7,pv=(avail/n-tx(fs))/2;if(pv<.45){fs=6;pv=(avail/n-tx(fs))/2}pv=Math.max(.2,Math.min(pv,1.8));
+ d.setFont('helvetica','bold').setFontSize(13).setTextColor(20,33,61).text('Laporan Presensi Bulan '+bl(m)+' Siswa Kelas '+k,W/2,14,{align:'center'});
+ d.setFontSize(11).setFont('helvetica','normal').text('SD Negeri 101731 - TP. '+tp(m),W/2,20,{align:'center'});d.setDrawColor(20,33,61).setLineWidth(.6).line(10,23,W-10,23);
+ d.autoTable({startY:top,margin:{left:10,right:10,bottom:10},theme:'grid',tableWidth:'auto',
+  head:[['No','Nama','NISN','JK',...R.ds.map(x=>String(+x.slice(8))),'H','S','I','A','Total']],
   body:R.rows.map(r=>[r.i+1,r.s.nama,r.s.nisn,r.s.jk,...r.cells,r.c.H,r.c.S,r.c.I,r.c.A,r.t]),
   foot:[['','Jumlah','','',...R.ds.map(()=>''),R.tot.H,R.tot.S,R.tot.I,R.tot.A,R.sum]],
-  styles:{fontSize:7,cellPadding:.9,halign:'center'},columnStyles:{1:{halign:'left',cellWidth:48}},headStyles:{fillColor:[11,37,69]},footStyles:{fillColor:[228,234,244],textColor:20}});
- let y=d.lastAutoTable.finalY+7;if(y>H-62){d.addPage();y=20}
- const kp=kep(),w=wali(k),xr=W-90,p=R.sum?(R.tot.H/R.sum*100).toFixed(1):'0';
- d.setFont('helvetica','normal').setFontSize(9).text('Total kehadiran: Hadir '+R.tot.H+', Sakit '+R.tot.S+', Izin '+R.tot.I+', Alpa '+R.tot.A+'. Persentase kehadiran: '+p+'%',10,y);y+=9;
+  styles:{fontSize:fs,cellPadding:{top:pv,bottom:pv,left:.8,right:.8},halign:'center',valign:'middle',lineColor:[225,231,239],lineWidth:.2,textColor:[20,33,61]},
+  headStyles:{fillColor:[245,247,251],textColor:[20,33,61],fontStyle:'bold'},footStyles:{fillColor:[245,247,251],textColor:[20,33,61],fontStyle:'bold'},
+  columnStyles:{0:{cellWidth:8},1:{halign:'left',cellWidth:52},2:{cellWidth:22},3:{cellWidth:8}},
+  didParseCell:h=>{const j=h.column.index-4;if(j<0||j>=R.ds.length)return;const t=dt(R.ds[j]);if(t==='m'){h.cell.styles.fillColor=[253,226,224];h.cell.styles.textColor=[180,35,24]}else if(t==='s'){h.cell.styles.fillColor=[255,243,196];h.cell.styles.textColor=[122,82,0]}}});
+ let y=Math.min(d.lastAutoTable.finalY+8,H-10-FT+8);const xr=W-95;
+ d.setFont('helvetica','normal').setFontSize(9).setTextColor(20,33,61).text('Total kehadiran: Hadir '+R.tot.H+', Sakit '+R.tot.S+', Izin '+R.tot.I+', Alpa '+R.tot.A+'. Persentase kehadiran: '+p+'%',10,y);
+ d.setFontSize(7).text('Merah: Minggu / tanggal merah, kuning: Sabtu',10,y+4.5);d.setFontSize(9);y+=14;
  d.text('Diketahui,',30,y).text('Kepala Sekolah',30,y+5).text('Sunggal, '+tgl(R.last),xr,y).text('Wali Kelas '+k,xr,y+5);
  d.setFont('helvetica','bold').text(kp?kp.nama:'-',30,y+25).text(w?w.nama:'-',xr,y+25);
  d.setFont('helvetica','normal').text(nip(kp),30,y+30).text(nip(w),xr,y+30);d.save('Presensi-'+k+'-'+m+'.pdf')}
