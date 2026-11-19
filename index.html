@@ -119,7 +119,8 @@ const dt=d=>{if(LIBUR[d])return'm';const w=new Date(d+'T00:00:00').getDay();retu
 const alld=m=>{const n=new Date(+m.slice(0,4),+m.slice(5),0).getDate();return Array.from({length:n},(_,i)=>m+'-'+pad(i+1))};
 const tp=m=>{const y=+m.slice(0,4);return +m.slice(5)>=7?y+'/'+(y+1):(y-1)+'/'+y};
 const COL=['#00c389','#2f6fdb','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#14b8a6','#6366f1'],kc=k=>COL[S.kelas.indexOf(k)%COL.length];
-const sis=k=>S.siswa.filter(s=>s.kelas===k),isA=()=>S.user.role==='admin',isSub=()=>S.user.role==='guru'&&!S.user.wali&&!!S.user.mapel,MP=()=>isSub()?S.user.mapel:'',agOK=s=>!isSub()||!S.user.ag||s.agama.toLowerCase().slice(0,3)===S.user.ag.toLowerCase().slice(0,3),pool=k=>sis(k).filter(agOK),sgn=k=>isSub()?{l:'Guru '+S.user.mapel,g:S.guru.find(x=>x.id===S.user.id)}:(isA()&&S.dT)?{l:'Guru '+S.dT,g:S.guru.find(x=>!x.wali&&x.id!==S.kepsek&&mpOf(x)===S.dT)}:{l:'Wali Kelas '+k,g:wali(k)},
+const sis=k=>S.siswa.filter(s=>s.kelas===k),isA=()=>S.user.role==='admin',isSub=()=>S.user.role==='guru'&&!S.user.wali&&!!S.user.mapel,MP=()=>isSub()?S.user.mapel:'',agOK=s=>!isSub()||!S.user.ag||s.agama.toLowerCase().slice(0,3)===S.user.ag.toLowerCase().slice(0,3),pool=k=>sis(k).filter(agOK),sgn=k=>isSub()?{l:gl(S.user.mapel),g:S.guru.find(x=>x.id===S.user.id)}:(isA()&&S.dT)?{l:gl(S.dT),g:S.guru.find(x=>!x.wali&&x.id!==S.kepsek&&mpOf(x)===S.dT)}:{l:'Wali Kelas '+k,g:wali(k)},
+gl=x=>/^guru\b/i.test(x)?x:'Guru '+x,
 agOf=g=>{const t=(g.jab+' '+g.mapel).toLowerCase();return/kristen|protestan/.test(t)?'Kristen':/katolik|katholik/.test(t)?'Katolik':/hindu/.test(t)?'Hindu':/bud/.test(t)?'Buddha':/agama|islam/.test(t)?'Islam':''},
 mpOf=g=>{if(!/guru/i.test(g.jab)||/guru kelas/i.test(g.jab))return'';const a=agOf(g);if(!g.mapel&&a)return'Agama '+a;return(g.mapel||g.jab.replace(/^guru\s+/i,'')).trim()},
 mapelList=()=>[...new Set(S.guru.filter(g=>g.id!==S.kepsek&&!g.wali).map(mpOf).filter(Boolean))].sort(),
@@ -173,9 +174,7 @@ function vDash(){const t=today(),m=t.slice(0,7),a=isA(),mq=a?'':MP(),{mp}=amap(m
  if(k){const c={H:0,S:0,I:0,A:0};pool(k).forEach(s=>dsT.forEach(d=>{const v=mp[d+'|'+k+'|'+s.nipd];if(v)c[v]++}));S.dc=c;const n=c.H+c.S+c.I+c.A;
   pc=`<p style="margin:10px 0 0">Persentase kehadiran bulan ini: <b>${n?(c.H/n*100).toFixed(1):0}%</b></p>`}
  if(a){if(S.user.def)al+=`<div class="al bl">Anda masih memakai password standar. Ganti di menu Setting.</div>`;
-  if(!wk(t))al+=`<div class="al bl">Hari ini libur${LIBUR[t]?' ('+esc(LIBUR[t])+')':''}, presensi harian tidak diisi.</div>`;
-  let tH=0;S.kelas.forEach(x=>{const c=cnt[t+'|'+x];if(c)tH+=c.H});
-  card4+=`<div class="stat" style="border-color:#12a15f"><b>${wk(t)?tH+' / '+S.siswa.length:'-'}</b><span>Hadir hari ini</span></div>`}
+  if(!wk(t))al+=`<div class="al bl">Hari ini libur${LIBUR[t]?' ('+esc(LIBUR[t])+')':''}, presensi harian tidak diisi.</div>`;}
  /* Rekap Kehadiran Siswa: semua tanggal, libur ditandai merah dan "-" */
  const ad=alld(m),cT=ad.map(()=>({s:0,f:0}));let gt=0;
  const body=ks.map(x=>{let s=0;const cells=ad.map((d,i)=>{const c=cnt[d+'|'+x],q=dt(d);if(c){s+=c.H;cT[i].s+=c.H;cT[i].f=1}return`<td class="${q}">${c?c.H:(q==='m'?'-':'')}</td>`}).join('');gt+=s;return`<tr><td class="l"><b>${esc(x)}</b></td>${cells}<td><b>${s}</b></td></tr>`}).join('');
@@ -225,10 +224,14 @@ function vSis(){const q=(S.q||'').toLowerCase(),f=S.fk||'';const L=S.siswa.filte
  return`<div class="card"><div class="row"><input placeholder="Cari nama, NISN, NIPD" value="${esc(S.q||'')}" oninput="S.q=this.value;clearTimeout(S.tq);S.tq=setTimeout(()=>{render();const i=document.querySelector('.card input');i.focus();i.setSelectionRange(99,99)},300)"><select onchange="S.fk=this.value;render()"><option value="">Semua kelas</option>${S.kelas.map(k=>`<option ${k===f?'selected':''}>${k}</option>`).join('')}</select><span class="chip">${L.length} siswa</span></div><div class="tw"><table><tr><th>No</th><th>NIPD</th><th>NISN</th><th>Nama</th><th>JK</th><th>Tempat lahir</th><th>Tanggal lahir</th><th>Agama</th><th>Ayah</th><th>Ibu</th><th>Kelas</th></tr>${L.map((s,i)=>`<tr><td>${i+1}</td><td>${s.nipd}</td><td>${s.nisn}</td><td>${esc(s.nama)}</td><td>${s.jk}</td><td>${esc(s.tl)}</td><td>${esc(s.tgl)}</td><td>${esc(s.agama)}</td><td>${esc(s.ayah)}</td><td>${esc(s.ibu)}</td><td>${s.kelas}</td></tr>`).join('')}</table></div></div>`}
 
 /* ---------- download ---------- */
-function vDl(){if(!S.dM)S.dM=today().slice(0,7);if(!S.dK||!S.kelas.includes(S.dK))S.dK=S.user.wali||S.pK||S.kelas[0];
+function dlKelas(){if(isA())return S.kelas;if(isSub()){const ok=new Set();(AT[S.dM]||[]).forEach(x=>{if((x[4]||'')===S.user.mapel)ok.add(x[1])});return S.kelas.filter(c=>ok.has(c))}return S.user.wali?[S.user.wali]:[]}
+function vDl(){if(!S.dM)S.dM=today().slice(0,7);const KL=dlKelas();if(!KL.includes(S.dK))S.dK=KL[0]||'';
+ const mon=`<input type="month" value="${S.dM}" onchange="chM(this.value)">`;
+ if(!S.dK)return`<div class="card"><div class="row">${mon}</div><p style="color:var(--mu);margin:0">${isSub()?'Belum ada presensi '+esc(S.user.mapel)+' yang Anda isi pada bulan ini.':'Akun Anda belum ditetapkan sebagai wali kelas.'}</p></div>`;
+ const ksel=KL.length>1?`<select onchange="S.dK=this.value;render()">${KL.map(x=>`<option ${x===S.dK?'selected':''}>${esc(x)}</option>`).join('')}</select>`:`<span class="chip">Kelas ${esc(S.dK)}</span>`;
  const R=recap(S.dK,S.dM),k=kep(),sg=sgn(S.dK),pct=R.sum?(R.tot.H/R.sum*100).toFixed(1):'0';
- return`<div class="card"><div class="row"><input type="month" value="${S.dM}" onchange="chM(this.value)"><select onchange="S.dK=this.value;render()">${S.kelas.map(x=>`<option ${x===S.dK?'selected':''}>${x}</option>`).join('')}</select><button class="btn" onclick="pdf()">Unduh PDF</button></div>
- ${isA()?`<div class="row"><span style="color:var(--mu);font-size:13px">Rekap guru:</span><select onchange="S.dT=this.value;render()"><option value="">Presensi harian (wali kelas)</option>${mapelList().map(x=>`<option ${x===S.dT?'selected':''}>${esc(x)}</option>`).join('')}</select></div>`:''}
+ return`<div class="card"><div class="row">${mon}${ksel}<button class="btn" onclick="pdf()">Unduh PDF</button></div>
+ ${isA()?`<div class="row"><span style="color:var(--mu);font-size:13px">Pilih Mata Pelajaran:</span><select onchange="S.dT=this.value;render()"><option value="">-</option>${mapelList().map(x=>`<option ${x===S.dT?'selected':''}>${esc(x)}</option>`).join('')}</select></div>`:''}
  <div class="rep"><b>Laporan Presensi Bulan ${bl(S.dM)} Siswa Kelas ${esc(S.dK)}${RMP()?' - '+esc(RMP()):''}</b><b style="font-weight:500">SD Negeri 101731 - TP. ${tp(S.dM)}</b><hr></div>
  <div class="tw"><table class="rc"><tr><th>No</th><th class="l">Nama</th><th>NISN</th><th>JK</th>${R.ds.map(d=>`<th class="${dt(d)}" title="${esc(LIBUR[d]||'')}">${+d.slice(8)}</th>`).join('')}<th>H</th><th>S</th><th>I</th><th>A</th><th>Total</th></tr>
  ${R.rows.map(r=>`<tr><td>${r.i+1}</td><td class="l">${esc(r.s.nama)}</td><td>${r.s.nisn}</td><td>${r.s.jk}</td>${r.cells.map((c,j)=>`<td class="${dt(R.ds[j])}">${c==='H'?'<span class="ck">✓</span>':c}</td>`).join('')}<td>${r.c.H}</td><td>${r.c.S}</td><td>${r.c.I}</td><td>${r.c.A}</td><td>${r.t}</td></tr>`).join('')}
