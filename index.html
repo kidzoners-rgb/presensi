@@ -166,7 +166,6 @@ function vDash(){const t=today(),m=t.slice(0,7),a=isA(),{mp}=amap(m,a?'':MP()),d
   const tags=z=>z.map(y=>`<span class="tg">${esc(y)}</span>`).join('');
   if(S.user.def)al+=`<div class="al bl">Anda masih memakai password standar. Ganti di menu Setting.</div>`;
   if(!tw)al+=`<div class="al bl">Hari ini libur${LIBUR[t]?' ('+esc(LIBUR[t])+')':''}, presensi harian tidak diisi.</div>`;
-  else{const b=S.kelas.filter(x=>!cnt[t+'|'+x]);al+=b.length?`<div class="al"><b>Belum mengisi presensi hari ini (${tgl(t)})</b><br>${tags(b)}</div>`:`<div class="al bl">Semua rombel sudah mengisi presensi hari ini.</div>`}
   let tH=0,tN=0,tS=0,tI=0,tA=0,tB=0;
   const rows=S.kelas.map(x=>{const n=sis(x).length,c=cnt[t+'|'+x];tN+=n;
    if(!c){tB+=n;return`<tr><td><b>${esc(x)}</b></td><td>${n}</td><td colspan="6" style="color:var(--wat)">Belum mengisi</td></tr>`}
@@ -174,11 +173,8 @@ function vDash(){const t=today(),m=t.slice(0,7),a=isA(),{mp}=amap(m,a?'':MP()),d
    return`<tr><td><b>${esc(x)}</b></td><td>${n}</td><td>${c.H}</td><td>${c.S}</td><td>${c.I}</td><td>${c.A}</td><td>${b}</td><td>${n?Math.round(c.H/n*100):0}%</td></tr>`}).join('');
   card4+=`<div class="stat" style="border-color:#12a15f"><b>${tw?tH+' / '+tN:'-'}</b><span>Hadir hari ini</span></div>`;
   const pd=ds.map(d=>{let s=0,f=0;S.kelas.forEach(x=>{const c=cnt[d+'|'+x];if(c){s+=c.H;f=1}});return{d,s,f}}),grand=pd.reduce((z,x)=>z+x.s,0);
-  S.dday={l:ds.map(d=>String(+d.slice(8))),v:pd.map(x=>x.f?x.s:null),n:S.siswa.length};
   const mx=S.kelas.map(x=>{let s=0;const cells=ds.map(d=>{const c=cnt[d+'|'+x];if(c)s+=c.H;return`<td>${c?c.H:''}</td>`}).join('');return`<tr><td class="l"><b>${esc(x)}</b></td>${cells}<td><b>${s}</b></td></tr>`}).join('');
-  ex=`<div class="card"><h3>Kehadiran Hari Ini per Rombel</h3><small style="color:var(--mu)">${tgl(t)}</small>${tw?`<div class="tw" style="margin-top:8px"><table><tr><th>Rombel</th><th>Siswa</th><th>Hadir</th><th>Sakit</th><th>Izin</th><th>Alpa</th><th>Belum</th><th>% Hadir</th></tr>${rows}<tr style="font-weight:700"><td>Jumlah</td><td>${tN}</td><td>${tH}</td><td>${tS}</td><td>${tI}</td><td>${tA}</td><td>${tB}</td><td>${tN?Math.round(tH/tN*100):0}%</td></tr></table></div>`:'<p style="color:var(--mu)">Hari ini libur, tidak ada presensi.</p>'}</div>
-  <div class="card"><h3>Jumlah Siswa Hadir per Hari</h3><small style="color:var(--mu)">Bulan ${bl(m)}, seluruh rombel (dari ${S.siswa.length} siswa)</small><div style="height:260px;margin-top:8px"><canvas id="c4"></canvas></div></div>
-  <div class="card"><h3>Jumlah Siswa Hadir per Hari dan Rombel</h3><small style="color:var(--mu)">Bulan ${bl(m)}. Sel kosong berarti belum ada presensi.</small><div class="tw" style="margin-top:8px"><table class="rc"><tr><th class="l">Rombel</th>${ds.map(d=>`<th>${+d.slice(8)}</th>`).join('')}<th>Total</th></tr>${mx}<tr style="font-weight:700"><td class="l">Jumlah</td>${pd.map(x=>`<td>${x.f?x.s:''}</td>`).join('')}<td>${grand}</td></tr></table></div></div>`}
+  ex=`<div class="card"><h3>Jumlah Siswa Hadir per Hari dan Rombel</h3><small style="color:var(--mu)">Bulan ${bl(m)}. Sel kosong berarti belum ada presensi.</small><div class="tw" style="margin-top:8px"><table class="rc"><tr><th class="l">Rombel</th>${ds.map(d=>`<th>${+d.slice(8)}</th>`).join('')}<th>Total</th></tr>${mx}<tr style="font-weight:700"><td class="l">Jumlah</td>${pd.map(x=>`<td>${x.f?x.s:''}</td>`).join('')}<td>${grand}</td></tr></table></div></div>`}
  const lg=k?'':'<div class="lg">'+S.kelas.map(x=>`<span><i style="background:${kc(x)}"></i>${esc(x)}</span>`).join('')+'</div>',h=k?200:S.kelas.length*30+70;
  return`<div class="hero"><h1>Ruang Kelasku</h1><p>Absen Online Siswa/i SD Negeri 101731</p></div>`+al+`<div class="grid"><div class="stat"><b>${P.length}</b><span>Total siswa</span></div><div class="stat" style="border-color:#2f6fdb"><b>${L}</b><span>Laki-laki</span></div><div class="stat" style="border-color:#ec4899"><b>${P.length-L}</b><span>Perempuan</span></div>${card4}</div>`+ex+
  `<div class="two"><div class="card"><h3>Jenis kelamin${k?' Kelas '+esc(k):''}</h3><canvas id="c1"></canvas></div><div class="card"><h3>Rekap Kehadiran Bulanan ${k?'Kelas '+esc(k):'Semua Rombel'}${isSub()?' - '+esc(S.user.mapel):''}</h3><small style="color:var(--mu)">Bulan ${bl(m)}</small><div style="height:${h}px;margin-top:8px"><canvas id="c3"></canvas></div>${lg}${pc}</div></div>`}
@@ -188,7 +184,7 @@ function chartsInit(){Chart.defaults.color=getComputedStyle(document.body).color
  if(S.dc){const c=S.dc,n=c.H+c.S+c.I+c.A;
   CH.push(new Chart($('#c3'),{type:'bar',data:{labels:['Hadir','Sakit','Izin','Alpa'],datasets:[{data:[c.H,c.S,c.I,c.A],backgroundColor:['#12a15f','#d99a00','#2f6fdb','#d92d20'],borderRadius:6}]},options:o(x=>x.raw+' catatan ('+(n?Math.round(x.raw/n*1000)/10:0)+'%)',{beginAtZero:true})}))}
  else CH.push(new Chart($('#c3'),{type:'bar',data:{labels:S.kelas,datasets:[{data:S.dm.map(x=>x.pct),backgroundColor:S.kelas.map(kc),borderRadius:6}]},options:o(x=>{const d=S.dm[x.dataIndex];return d.tt?d.pct+'% hadir ('+d.h+' dari '+d.tt+' catatan)':'Belum ada data'},{min:0,max:100,ticks:{callback:v=>v+'%'}})}));
- if(S.dday&&$('#c4'))CH.push(new Chart($('#c4'),{type:'bar',data:{labels:S.dday.l,datasets:[{data:S.dday.v,backgroundColor:'#12a15f',borderRadius:5}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>x.raw+' siswa hadir dari '+S.dday.n+' siswa'}}},scales:{y:{beginAtZero:true,max:S.dday.n}}}}))}
+}
 
 /* ---------- presensi ---------- */
 const pList=()=>pool(S.pK),cur=n=>S.dr[n]??amap(S.pD.slice(0,7),MP()).mp[S.pD+'|'+S.pK+'|'+n]??'';
