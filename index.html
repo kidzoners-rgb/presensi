@@ -105,7 +105,7 @@ html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
-const API='https://script.google.com/macros/s/AKfycbzthdmCZCuiP22hNuR1uiL_psKL61hi_n8Z2K5n2dcqc4AdNUlBfW3ErDZlsDRjGma2/exec';
+const API='https://script.google.com/macros/s/AKfycbwOJIYmj81ArrCdYFkkhwLujOd2YITgJWTBiybgWv9wXLY1bjWbpJSqgi2jvo01Me8s/exec';
 const S={token:'',user:null,siswa:[],guru:[],kepsek:'',kelas:[],view:'dash'},AT={};let CH=[],role='guru';
 const $=s=>document.querySelector(s),esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pad=n=>String(n).padStart(2,'0'),iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),today=()=>iso(new Date());
@@ -139,7 +139,7 @@ async function loginGo(){const b=$('#lb');b.disabled=true;$('#le').textContent='
 async function boot(){const r=await api('boot');Object.assign(S,r);$('#login').hidden=true;$('#app').hidden=false;
  $('#who').textContent=S.user.nama+(S.user.wali?' · Kelas '+S.user.wali:'')+(isSub()?' · '+S.user.mapel:'');
  const m=[['dash','📊','Dashboard'],['pres','✅','Presensi'],...(isA()?[['kepsek','🎓','Data Kepala Sekolah']]:[]),['guru','👥','Data Guru'],['siswa','🧒','Data Siswa'],['dl','📄','Download'],['set','⚙️','Setting']];
- $('#nv').innerHTML=m.map(x=>`<button data-v="${x[0]}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('');await loadLibur(new Date().getFullYear());if(isSub()&&!S.pK)S.view='pres';go(S.view)}
+ $('#nv').innerHTML=m.map(x=>`<button data-v="${x[0]}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('');await loadLibur(new Date().getFullYear());if(isSub()&&!S.pK)S.view='pres';if(S.user.def)S.view='set';await go(S.view);if(S.user.def)toast('Ganti '+(isA()?'password':'PIN')+' standar Anda terlebih dahulu.')}
 function logout(){ls('tk',null);S.token='';S.user=null;location.reload()}
 function menu(o){$('#sb').classList.toggle('open',!!o);$('#ov').hidden=!o}
 
@@ -216,7 +216,7 @@ async function setK(){try{await api('setKepsek',{id:$('#ks').value});await boot(
 function vGuru(){const a=isA(),G=S.guru.filter(g=>g.id!==S.kepsek);
  return`<div class="card">${a?'<div class="row"><button class="btn sec sm" onclick="resetPin(\'all\')">Reset PIN semua guru</button></div>':''}<div class="tw"><table><tr><th>No</th><th>Nama</th><th>JK</th><th>NIP</th><th>Jabatan</th><th>Wali kelas</th><th>Mata pelajaran</th>${a?'<th></th>':''}</tr>${G.map((g,i)=>`<tr><td>${i+1}</td><td>${esc(g.nama)}</td><td>${esc(g.jk)}</td><td>${esc(g.nip)}</td><td>${esc(g.jab)}</td>${a?`<td><select id="w${g.row}"><option value="">-</option>${S.kelas.map(k=>`<option ${k===g.wali?'selected':''}>${k}</option>`).join('')}</select></td><td><input id="m${g.row}" value="${esc(g.mapel)}" placeholder="${esc(g.jab.replace(/^Guru\s+/i,''))}" style="width:160px"></td><td><button class="btn sm" onclick="updG(${g.row})">Simpan</button> <button class="btn sec sm" onclick="resetPin('${esc(g.id)}')">Reset PIN</button></td>`:`<td>${esc(g.wali||'-')}</td><td>${esc(g.mapel||'-')}</td>`}</tr>`).join('')}</table></div></div>`}
 async function updG(r){try{await api('updGuru',{row:r,wali:$('#w'+r).value,mapel:$('#m'+r).value});S.guru=(await api('boot')).guru;toast('Data guru disimpan ke spreadsheet.')}catch(e){toast(e.message,1)}}
-async function resetPin(id){if(!confirm(id==='all'?'Kembalikan PIN semua guru ke PIN standar?':'Kembalikan PIN guru ini ke PIN standar?'))return;try{await api('resetPin',{id});toast('PIN dikembalikan ke standar (123456).')}catch(e){toast(e.message,1)}}
+async function resetPin(id){if(!confirm(id==='all'?'Kembalikan PIN semua guru ke PIN standar?':'Kembalikan PIN guru ini ke PIN standar?'))return;try{await api('resetPin',{id});toast('PIN dikembalikan ke PIN awal dari admin.')}catch(e){toast(e.message,1)}}
 function vSis(){const q=(S.q||'').toLowerCase(),f=S.fk||'';const L=S.siswa.filter(s=>(!f||s.kelas===f)&&(!q||(s.nama+s.nisn+s.nipd).toLowerCase().includes(q)));
  return`<div class="card"><div class="row"><input placeholder="Cari nama, NISN, NIPD" value="${esc(S.q||'')}" oninput="S.q=this.value;clearTimeout(S.tq);S.tq=setTimeout(()=>{render();const i=document.querySelector('.card input');i.focus();i.setSelectionRange(99,99)},300)"><select onchange="S.fk=this.value;render()"><option value="">Semua kelas</option>${S.kelas.map(k=>`<option ${k===f?'selected':''}>${k}</option>`).join('')}</select><span class="chip">${L.length} siswa</span></div><div class="tw"><table><tr><th>No</th><th>NIPD</th><th>NISN</th><th>Nama</th><th>JK</th><th>Tempat lahir</th><th>Tanggal lahir</th><th>Agama</th><th>Ayah</th><th>Ibu</th><th>Kelas</th></tr>${L.map((s,i)=>`<tr><td>${i+1}</td><td>${s.nipd}</td><td>${s.nisn}</td><td>${esc(s.nama)}</td><td>${s.jk}</td><td>${esc(s.tl)}</td><td>${esc(s.tgl)}</td><td>${esc(s.agama)}</td><td>${esc(s.ayah)}</td><td>${esc(s.ibu)}</td><td>${s.kelas}</td></tr>`).join('')}</table></div></div>`}
 
@@ -250,7 +250,7 @@ function pdf(){const{jsPDF}=window.jspdf,W=330,H=215,d=new jsPDF({orientation:'l
  d.setFont('helvetica','normal').text(nip(kp),30,y+30).text(nip(sg.g),xr,y+30);d.save('Presensi-'+k+'-'+m+'.pdf')}
 
 /* ---------- setting ---------- */
-function vSet(){const a=isA();return`<div class="card" style="max-width:420px"><h3>Ganti ${a?'password':'PIN'}</h3><div class="row"><input id="po" type="password" placeholder="${a?'Password':'PIN'} lama" style="flex:1"></div><div class="row"><input id="pn" type="password" placeholder="${a?'Password baru (min. 6 karakter)':'PIN baru (4-8 angka)'}" ${a?'':'inputmode="numeric"'} style="flex:1"></div><button class="btn" onclick="chPin()">Simpan</button><p style="color:var(--mu);font-size:13px">${a?'':'PIN standar semua guru: 123456. '}Setelah diganti, gunakan yang baru saat masuk.</p></div>`}
+function vSet(){const a=isA();return`<div class="card" style="max-width:420px"><h3>Ganti ${a?'password':'PIN'}</h3><div class="row"><input id="po" type="password" placeholder="${a?'Password':'PIN'} lama" style="flex:1"></div><div class="row"><input id="pn" type="password" placeholder="${a?'Password baru (min. 6 karakter)':'PIN baru (4-8 angka)'}" ${a?'':'inputmode="numeric"'} style="flex:1"></div><button class="btn" onclick="chPin()">Simpan</button><p style="color:var(--mu);font-size:13px">${a?'':'Pilih PIN yang tidak mudah ditebak. '}Setelah diganti, gunakan yang baru saat masuk.</p></div>`}
 async function chPin(){try{await api('chPin',{old:$('#po').value,nw:$('#pn').value});S.user.def=false;$('#po').value=$('#pn').value='';toast('Berhasil diganti.')}catch(e){toast(e.message,1)}}
 
 setRole('guru');names();
