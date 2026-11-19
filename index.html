@@ -5,7 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ruang Kelasku</title>
 <link rel="icon" href="logo.png">
-<script>function lgErr(i){if(!i.dataset.f){i.dataset.f=1;i.src='https://drive.google.com/thumbnail?id=1jTDqAv8-ymtNT_AqKdu-5RN9K0VduhGX&sz=w256'}else{i.onerror=null;i.style.display='none'}}</script>
+<script>function lgErr(i){if(!i.dataset.f){i.dataset.f=1;i.src='https://drive.google.com/thumbnail?id=1jTDqAv8-ymtNT_AqKdu-5RN9K0VduhGX&sz=w256'}else{i.onerror=null;i.style.display='none'}}
+function cleanLogo(i){if(i.dataset.c||!i.naturalWidth)return;i.dataset.c=1;
+ try{const sc=Math.min(1,256/Math.max(i.naturalWidth,i.naturalHeight)),w=Math.round(i.naturalWidth*sc),h=Math.round(i.naturalHeight*sc),c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');x.drawImage(i,0,0,w,h);const d=x.getImageData(0,0,w,h),p=d.data,T=60,seen=new Uint8Array(w*h),st=[];
+  const push=(a,b)=>{const k=b*w+a,o=k*4;if(!seen[k]&&p[o+3]>0&&p[o]<T&&p[o+1]<T&&p[o+2]<T){seen[k]=1;st.push(k)}};
+  for(let a=0;a<w;a++){push(a,0);push(a,h-1)}for(let b=0;b<h;b++){push(0,b);push(w-1,b)}
+  while(st.length){const k=st.pop(),a=k%w,b=(k-a)/w;p[k*4+3]=0;if(a>0)push(a-1,b);if(a<w-1)push(a+1,b);if(b>0)push(a,b-1);if(b<h-1)push(a,b+1)}
+  x.putImageData(d,0,0);i.src=c.toDataURL('image/png')}catch(e){}}
+</script>
 <style>
 :root{--bg:#eef2f7;--card:#fff;--tx:#14213d;--mu:#667085;--bd:#e1e7ef;--nav:#0b2545;--nav2:#13315c;--ac:#00c389;--act:#04261c;--in:#f5f7fb;--wa:#fff4d6;--wat:#7a5200;--er:#d92d20}
 html[data-t=dark]{--bg:#0a1424;--card:#111e33;--tx:#e8edf6;--mu:#93a1b8;--bd:#223250;--nav:#07182f;--nav2:#102340;--in:#0c1829;--wa:#3a2c08;--wat:#ffd27a}
@@ -72,7 +80,7 @@ html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc 
 <body>
 <div id="login">
  <div class="lc">
-  <img class="lgo" src="logo.png" alt="Logo" onerror="lgErr(this)"><h1>Ruang Kelasku</h1><p>Masuk untuk mengisi dan melihat presensi.</p>
+  <img class="lgo" src="logo.png" alt="Logo" onload="cleanLogo(this)" onerror="lgErr(this)"><h1>Ruang Kelasku</h1><p>Masuk untuk mengisi dan melihat presensi.</p>
   <div class="seg"><button id="rg" class="on" onclick="setRole('guru')">Guru</button><button id="ra" onclick="setRole('admin')">Admin</button></div>
   <div id="fg"><label>Nama guru</label><select id="gsel"><option>Memuat…</option></select></div>
   <label id="plb">PIN</label><input id="pin" type="password" autocomplete="current-password" onkeydown="if(event.key=='Enter')loginGo()">
@@ -82,7 +90,7 @@ html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc 
 </div>
 <div id="app" hidden>
  <aside id="sb">
-  <div class="sh"><img class="lgs" src="logo.png" alt="Logo" onerror="lgErr(this)"><div><b>Ruang Kelasku</b><small>SD Negeri 101731</small></div></div>
+  <div class="sh"><img class="lgs" src="logo.png" alt="Logo" onload="cleanLogo(this)" onerror="lgErr(this)"><div><b>Ruang Kelasku</b><small>SD Negeri 101731</small></div></div>
   <nav id="nv"></nav>
   <div class="sf"><button onclick="theme()">🌙 Mode gelap</button><button class="out" onclick="logout()">⎋ Keluar</button></div>
  </aside>
