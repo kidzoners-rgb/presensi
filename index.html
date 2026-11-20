@@ -33,6 +33,19 @@ input,select{background:var(--in);border:1px solid var(--bd);border-radius:10px;
 .lgo{display:block;width:72px;height:72px;object-fit:contain;margin:0 auto}.lgs{width:40px;height:40px;object-fit:contain;flex:none}
 .hero{margin-bottom:14px}.hero h1{margin:0;font-size:24px;line-height:1.2}.hero p{margin:2px 0 0;color:var(--mu)}
 .ck{color:#12a15f;font-weight:700}
+.sgrid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}#srw{display:flex;justify-content:center;overflow:hidden}#srp{flex:none}#v.wide{max-width:1500px}
+#srf input:not([type=checkbox]),#srf select,#srf textarea{width:100%}.fl{display:block;font-size:12px;font-weight:600;margin:12px 0 4px}.ck2{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;margin:4px 0}.two2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bx{background:var(--in);border:1px solid var(--bd);border-radius:12px;padding:10px;margin-top:12px}.pr{background:var(--in);border:1px solid var(--bd);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;margin-bottom:8px}.pr a{color:var(--er);cursor:pointer;font-size:12px}
+.stp3{display:flex;gap:6px;margin:12px 0}.stp3 div{flex:1;text-align:center;padding:6px 2px;border-radius:10px;background:var(--in);font-size:12px;cursor:pointer}.stp3 div.on{background:var(--pr);color:var(--prt);font-weight:700}.stp3 span{display:inline-block;width:18px;height:18px;line-height:18px;border-radius:50%;background:#0002;margin-right:4px}
+.srp{font:12pt/1.5 Arial,Helvetica,sans-serif;color:#000;background:#fff;width:21cm;min-height:29.7cm;padding:1.4cm;box-sizing:border-box;box-shadow:0 8px 30px #0003;text-align:left}.srp p{margin:0}.srp table{border-collapse:collapse;width:auto;font-size:inherit}.srp td,.srp th{border:0;padding:2px 0;white-space:normal;vertical-align:top;background:none;position:static;text-align:left;font-size:inherit;color:#000}.srp tr{page-break-inside:avoid}
+.srp .kv{margin:4px 0 8px 1rem}.srp .bd{width:100%;margin:8px 0 16px;border:1px solid #000}.srp .bd th,.srp .bd td{border:1px solid #000;padding:4px 8px}.srp .bd th{background:#f3f4f6;text-align:center;font-weight:700}
+.srp .kopw{margin:0 -1.4cm 16px;text-align:center}.srp .kopw img{width:784px;max-width:none;height:auto}.srp .jd{text-align:center;margin:24px 0}.srp .jd h2{margin:0;font-weight:700;text-decoration:underline;font-size:18px;letter-spacing:.05em}
+.srp .nss{display:inline-flex;border:1px solid #000;font:700 11px monospace}.srp .nss span{padding:0 4px;border-right:1px solid #000}.srp .nss span:last-child{border:0}
+.srp .ttw{margin-top:16px;display:flex;justify-content:flex-end;page-break-inside:avoid}.srp .ttb{position:relative;width:18rem;padding-left:1rem}.srp .stp{position:absolute;top:4px;left:-1.6cm;width:3.8cm;height:3.8cm;pointer-events:none}.srp .stp img{width:100%;height:100%;object-fit:contain;opacity:.9}.srp .ttd{position:absolute;left:1.5rem;top:2.75rem;pointer-events:none}.srp .ttd img{height:2.3cm;width:auto;mix-blend-mode:multiply}.srp .nm{font-weight:700;text-decoration:underline;position:relative;z-index:2;padding-top:4rem}.srp .np{position:relative;z-index:2;line-height:1.25}
+#printRoot{display:none}
+@media(max-width:899px){.sgrid{grid-template-columns:1fr}}
+@media print{@page{size:A4;margin:1.4cm}body.printing>*:not(#printRoot){display:none!important}body.printing #printRoot{display:block!important}body.printing{background:#fff!important;padding:0!important}#printRoot .srp{padding:0!important;width:auto!important;min-height:0!important;box-shadow:none!important}}
+
 .tb th,.tb td.l{text-align:left}.tb th.sorter{cursor:pointer;user-select:none}.tb th.sorter:hover{color:var(--ac)}
 .tb td.cl{cursor:pointer;text-align:left;padding:7px 10px;background:linear-gradient(90deg,rgba(0,195,137,.2) var(--p),transparent var(--p))}.tb td.cl:hover{outline:2px solid var(--ac);outline-offset:-2px}.tb td small{color:var(--mu);margin-left:6px}.tb tr.tr td{font-weight:700;border-top:2px solid var(--tx)}
 .rc tr.me td:not(.m){background:rgba(0,195,137,.12)}
@@ -110,12 +123,12 @@ html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc 
  <button class="fab" id="fab" onclick="fab()">✅ Absen</button>
  <div class="main"><header><button class="mb" onclick="menu(1)">☰<i class="dot" id="dotM" hidden></i></button><h2 id="ttl"></h2><span class="chip" id="who"></span></header><main id="v"></main><footer class="cp">© 2026 | Domo</footer></div>
 </div>
-<div id="mo"></div><div id="toast" hidden></div>
+<div id="mo"></div><div id="printRoot"></div><div id="toast" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
-const API='https://script.google.com/macros/s/AKfycbwhQ3V67NnypNvvUQe4qPm91jsyy4AD77y8av-pBnX5Libi2xg3POxrjNu8unr5-5q9/exec';
+const API='https://script.google.com/macros/s/AKfycbyaNF0f66EBneJdDgAQRgK-UiHm-D7FEvO_JE2ERrt6YajtRxCFGC7antwLgjyqVVE8/exec';
 const S={token:'',user:null,siswa:[],guru:[],kepsek:'',kelas:[],view:'dash'},AT={};let CH=[],role='guru';
 const $=s=>document.querySelector(s),esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pad=n=>String(n).padStart(2,'0'),iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),today=()=>iso(new Date());
@@ -155,7 +168,7 @@ async function loginGo(){const b=$('#lb');b.disabled=true;$('#le').textContent='
  try{const r=await api('login',{role,id:$('#gsel').value,pin:$('#pin').value});S.token=r.token;ls('tk',r.token);await boot()}catch(e){$('#le').textContent=e.message}b.disabled=false}
 async function boot(){const r=await api('boot');Object.assign(S,r);$('#login').hidden=true;$('#app').hidden=false;
  $('#who').textContent=S.user.nama+(S.user.wali?' · Kelas '+S.user.wali:'')+(isSub()?' · '+S.user.mapel:'');
- const m=[['dash','📊','Dashboard'],['pres','✅','Presensi'],...(isA()?[['kepsek','🎓','Data Kepala Sekolah']]:[]),['guru','👥','Data Guru'],['siswa','🧒','Data Siswa'],['dl','📄','Rekap Absen'],['surat','✉️','Arsip Surat'],['set','⚙️','Setting']];
+ const m=[['dash','📊','Dashboard'],['pres','✅','Presensi'],...(isA()?[['kepsek','🎓','Data Kepala Sekolah']]:[]),['guru','👥','Data Guru'],['siswa','🧒','Data Siswa'],['dl','📄','Rekap Absen'],['surat','✉️','Arsip Surat'],...(canSurat()?[['buat','🖨️','Buat Surat']]:[]),['set','⚙️','Setting']];
  $('#nv').innerHTML=m.map(x=>`<button data-v="${x[0]}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}${x[0]==='surat'?'<i class="dot" id="dotS" hidden></i>':''}</button>`).join('');if(!isA())await refreshSurat();await loadLibur(new Date().getFullYear());if(isSub()&&!S.pK)S.view='pres';if(S.user.def)S.view='set';await go(S.view);if(S.user.def)toast('Ganti '+(isA()?'password':'PIN')+' standar Anda terlebih dahulu.')}
 function logout(){ls('tk',null);S.token='';S.user=null;location.reload()}
 function menu(o){$('#sb').classList.toggle('open',!!o);$('#ov').hidden=!o}
@@ -169,9 +182,9 @@ function recap(k,m){const{mp,fl}=amap(m,RMP()),ds=alld(m),tot={H:0,S:0,I:0,A:0};
  const f=ds.filter(d=>fl[d+'|'+k]);return{rows,ds,tot,sum:tot.H+tot.S+tot.I+tot.A,last:f.length?f[f.length-1]:ds[ds.length-1]}}
 
 async function go(v){S.view=v;menu(0);document.querySelectorAll('#nv button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
- $('#fab').textContent=v==='pres'?'💾 Simpan':'✅ Absen';$('#ttl').textContent={dash:'Dashboard',pres:'Presensi Harian',kepsek:'Data Kepala Sekolah',guru:'Data Guru',siswa:'Data Siswa',dl:'Rekap Absen',surat:'Arsip Surat',set:'Setting'}[v];
+ $('#fab').textContent=v==='pres'?'💾 Simpan':'✅ Absen';$('#ttl').textContent={dash:'Dashboard',pres:'Presensi Harian',kepsek:'Data Kepala Sekolah',guru:'Data Guru',siswa:'Data Siswa',dl:'Rekap Absen',surat:'Arsip Surat',buat:'Buat Surat',set:'Setting'}[v];
  if(['dash','pres','dl'].includes(v))await loadAtt(mOf());if(v==='surat')await refreshSurat();render()}
-function render(){CH.forEach(c=>c.destroy());CH=[];if(S.stCh){S.stCh.destroy();S.stCh=null}const f={dash:vDash,pres:vPres,kepsek:vKep,guru:vGuru,siswa:vSis,dl:vDl,surat:vSurat,set:vSet}[S.view];$('#v').innerHTML=f();({dash:chartsInit,pres:pl}[S.view]||(()=>0))()}
+function render(){CH.forEach(c=>c.destroy());CH=[];if(S.stCh){S.stCh.destroy();S.stCh=null}const f={dash:vDash,pres:vPres,kepsek:vKep,guru:vGuru,siswa:vSis,dl:vDl,surat:vSurat,buat:vBuat,set:vSet}[S.view];$('#v').classList.toggle('wide',S.view==='buat');$('#v').innerHTML=f();({dash:chartsInit,pres:pl,set:cdgLoad,buat:srAfter}[S.view]||(()=>0))()}
 setInterval(async()=>{if(!S.user||document.hidden||!['dash','pres','dl'].includes(S.view)||$('#mo').innerHTML)return;if(await loadAtt(mOf()))render()},15000);
 
 /* ---------- dashboard ---------- */
@@ -224,8 +237,8 @@ function askSave(){const L=pList(),c={H:0,S:0,I:0,A:0};let u=0;S.pm={};if(!L.len
 async function doSave(){$('#ys').disabled=true;try{await api('save',{kelas:S.pK,tanggal:S.pD,marks:S.pm,mapel:MP()});S.dr={};await loadAtt(S.pD.slice(0,7));closeM();toast('Presensi tersimpan.');render()}catch(e){closeM();toast(e.message,1)}}
 
 /* ---------- data ---------- */
-function vKep(){const k=kep();return`<div class="card"><h3>Kepala sekolah saat ini</h3><p>${k?`<b>${esc(k.nama)}</b><br>${esc(nip(k))}`:'Belum dipilih.'}</p><div class="row"><select id="ks">${S.guru.map(g=>`<option value="${esc(g.id)}" ${g.id===S.kepsek?'selected':''}>${esc(g.nama)}</option>`).join('')}</select><button class="btn" onclick="setK()">Simpan</button></div><small style="color:var(--mu)">Nama yang dipilih tidak muncul lagi di Data Guru dan pilihan login guru.</small></div>`}
-async function setK(){try{await api('setKepsek',{id:$('#ks').value});await boot();toast('Kepala sekolah disimpan.')}catch(e){toast(e.message,1)}}
+function vKep(){const k=kep();return`<div class="card"><h3>Kepala sekolah saat ini</h3><p>${k?`<b>${esc(k.nama)}</b><br>${esc(nip(k))}`:'Belum dipilih.'}</p><div class="row"><select id="ks">${S.guru.map(g=>`<option value="${esc(g.id)}" ${g.id===S.kepsek?'selected':''}>${esc(g.nama)}</option>`).join('')}</select></div><div class="row" style="margin-top:10px"><input id="kg" placeholder="Golongan/Ruang, mis. Pembina Tk I, IVb" value="${esc(S.gol||GOL_DEF)}" style="flex:1"><button class="btn" onclick="setK()">Simpan</button></div><small style="color:var(--mu)">Nama yang dipilih tidak muncul lagi di Data Guru dan pilihan login guru.</small></div>`}
+async function setK(){try{await api('setKepsek',{id:$('#ks').value,gol:$('#kg').value});await boot();toast('Kepala sekolah disimpan.')}catch(e){toast(e.message,1)}}
 function vGuru(){const a=isA(),G=S.guru.filter(g=>g.id!==S.kepsek);
  return`<div class="card">${a?'<div class="row"><button class="btn sec sm" onclick="resetPin(\'all\')">Reset PIN semua guru</button></div>':''}<div class="tw"><table><tr><th>No</th><th>Nama</th><th>JK</th><th>NIP</th><th>Jabatan</th><th>Wali kelas</th><th>Mata pelajaran</th>${a?'<th></th>':''}</tr>${G.map((g,i)=>`<tr><td>${i+1}</td><td>${esc(g.nama)}</td><td>${esc(g.jk)}</td><td>${esc(g.nip)}</td><td>${esc(g.jab)}</td>${a?`<td><select id="w${g.row}"><option value="">-</option>${S.kelas.map(k=>`<option ${k===g.wali?'selected':''}>${k}</option>`).join('')}</select></td><td><input id="m${g.row}" value="${esc(g.mapel)}" placeholder="${esc(g.jab.replace(/^Guru\s+/i,''))}" style="width:160px"></td><td><button class="btn sm" onclick="updG(${g.row})">Simpan</button> <button class="btn sec sm" onclick="resetPin('${esc(g.id)}')">Reset PIN</button></td>`:`<td>${esc(g.wali||'-')}</td><td>${esc(g.mapel||'-')}</td>`}</tr>`).join('')}</table></div></div>`}
 async function updG(r){try{await api('updGuru',{row:r,wali:$('#w'+r).value,mapel:$('#m'+r).value});S.guru=(await api('boot')).guru;toast('Data guru disimpan ke spreadsheet.')}catch(e){toast(e.message,1)}}
@@ -321,7 +334,98 @@ async function kirimS(){const pen=[...document.querySelectorAll('.pn:checked')].
 async function hapusS(id){if(!confirm('Hapus surat ini dari semua penerima?'))return;try{await api('hapusSurat',{id});await refreshSurat();render();toast('Surat dihapus.')}catch(e){toast(e.message,1)}}
 
 /* ---------- setting ---------- */
-function vSet(){const a=isA();return`<div class="card" style="max-width:420px"><h3>Ganti ${a?'password':'PIN'}</h3><div class="row"><input id="po" type="password" placeholder="${a?'Password':'PIN'} lama" style="flex:1"></div><div class="row"><input id="pn" type="password" placeholder="${a?'Password baru (min. 6 karakter)':'PIN baru (4-8 angka)'}" ${a?'':'inputmode="numeric"'} style="flex:1"></div><button class="btn" onclick="chPin()">Simpan</button><p style="color:var(--mu);font-size:13px">${a?'':'Pilih PIN yang tidak mudah ditebak. '}Setelah diganti, gunakan yang baru saat masuk.</p></div>`}
+function vSet0(){const a=isA();return`<div class="card" style="max-width:420px"><h3>Ganti ${a?'password':'PIN'}</h3><div class="row"><input id="po" type="password" placeholder="${a?'Password':'PIN'} lama" style="flex:1"></div><div class="row"><input id="pn" type="password" placeholder="${a?'Password baru (min. 6 karakter)':'PIN baru (4-8 angka)'}" ${a?'':'inputmode="numeric"'} style="flex:1"></div><button class="btn" onclick="chPin()">Simpan</button><p style="color:var(--mu);font-size:13px">${a?'':'Pilih PIN yang tidak mudah ditebak. '}Setelah diganti, gunakan yang baru saat masuk.</p></div>`}
+/* ---------- buat surat (SPT, Ket. Aktif, Surat Pindah, Suket PIP) ---------- */
+const KOPF='kop%20surat.png',TTDF='ttd%20kepsek.png',STPF='stempel.png',GOL_DEF='Pembina Tk I, IVb',NSS='101070103004';
+const canSurat=()=>S.user&&(isA()||/operator/i.test((S.guru.find(g=>g.id===S.user.id)||{}).jab||''));
+const srNew=()=>({spt:{no:'',tgl:today(),pes:[''],keg:'',dn:false,pj:'Kepala Dinas Pendidikan Kabupaten Deli Serdang',nd:'',td:'',hari:'',pkl:'08.00 WIB s.d Selesai',tmp:'',ttd:true,stp:true},
+ aktif:{q:'',sid:'',no:'',tgl:today(),ortu:'',ttd:true,stp:true},
+ pindah:{q:'',sid:'',no:'',tgl:today(),jk:'Laki-laki',tuj:'',als:'permintaan orang tua',ortu:'',krj:'',ttd:true,stp:true},
+ pip:{q:'',sid:'',no:'',tgl:today(),png:'',nik:'',hub:'Orang tua kandung',ttd:true,stp:true}});
+let SR=null;
+function srInit(){if(SR)return;let d=null;try{d=JSON.parse(localStorage.getItem('sr_v1')||'null')}catch(e){}SR=Object.assign({tab:'spt',step:1},srNew(),d||{});['spt','aktif','pindah','pip'].forEach(t=>SR[t].tgl=today())}
+const srSave=()=>{try{localStorage.setItem('sr_v1',JSON.stringify(SR))}catch(e){}};
+const sw=id=>S.siswa.find(s=>s.nipd===id),KS=()=>{const g=kep()||{};return{nama:g.nama||'(pilih di menu Data Kepala Sekolah)',nip:g.nip||'-',gol:S.gol||GOL_DEF}};
+function lahir(s){const t=s.tgl||'';let m=t.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/),d,mo,y;
+ if(m){d=+m[1];mo=+m[2];y=m[3];if(mo>12){const z=d;d=mo;mo=z}}else if(m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)){y=m[1];mo=+m[2];d=+m[3]}
+ return[s.tl,y&&BLN[mo-1]?d+' '+BLN[mo-1]+' '+y:t].filter(Boolean).join(', ')}
+const kop=()=>`<div class="kopw"><img src="${KOPF}" alt="Kop" onerror="this.style.display='none'"></div>`;
+const ttdB=(d,o)=>{const k=KS();return`<div class="ttw"><div class="ttb"><p>Sunggal, ${tgl(d||today())}</p><p style="margin-bottom:8px">Kepala Sekolah</p>${o.stp?`<div class="stp"><img src="${STPF}" alt="Stempel" onerror="this.style.display='none'"></div>`:''}${o.ttd?`<div class="ttd"><img src="${TTDF}" alt="Tanda tangan" onerror="this.style.display='none'"></div>`:''}<p class="nm">${esc(k.nama)}</p><p class="np">NIP. ${esc(k.nip)}</p></div></div>`};
+const jd=(t,n,sz)=>`<div class="jd"><h2${sz?` style="font-size:${sz}px"`:''}>${t}</h2><p style="margin-top:4px">Nomor : ${esc(n||'...')}</p></div>`;
+const kvr=(l,v,w)=>`<tr><td style="width:${w}rem">${l}</td><td>: ${v}</td></tr>`;
+const V=x=>esc(x||'...');
+function hSpt(){const o=SR.spt,k=KS(),P=o.pes.map(id=>S.guru.find(g=>g.id===id)).filter(Boolean);
+ const rows=P.map((g,i)=>`<tr><td style="text-align:center">${i+1}.</td><td><b>${esc(g.nama)}</b></td><td style="text-align:center">${esc(g.nip||'-')}</td><td>${esc(g.jab||'-')}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center">...</td></tr>';
+ const din=o.dn?`, berdasarkan surat dari ${V(o.pj)} Nomor: ${V(o.nd)} Tanggal ${V(o.td)}`:'';
+ return kop()+jd('SURAT PERINTAH TUGAS (SPT)',o.no)+`<p>Yang bertanda tangan dibawah ini:</p><table class="kv">${kvr('Nama','<b>'+esc(k.nama)+'</b>',7)}${kvr('NIP',esc(k.nip),7)}${kvr('Gol/Ruang',esc(k.gol),7)}${kvr('Jabatan','Kepala Sekolah',7)}${kvr('Unit Kerja','UPT SPF SD Negeri 101731',7)}</table><p>menugaskan kepada:</p>
+ <table class="bd"><thead><tr><th style="width:2.5rem">No.</th><th>Nama</th><th>NIP</th><th>Jabatan</th></tr></thead><tbody>${rows}</tbody></table>
+ <p style="text-align:justify">Untuk mengikuti <b>${V(o.keg)}</b>${din}, yang dilaksanakan pada:</p><table class="kv">${kvr('Hari/Tanggal','<b>'+V(o.hari)+'</b>',8)}${kvr('Pukul',V(o.pkl),8)}${kvr('Tempat',V(o.tmp),8)}</table>
+ <p style="padding-top:8px">Demikian surat perintah tugas ini diberikan untuk dapat dilaksanakan dengan penuh tanggung jawab.</p>`+ttdB(o.tgl,o)}
+function hAkt(){const o=SR.aktif,s=sw(o.sid)||{},m=+o.tgl.slice(5,7),y=+o.tgl.slice(0,4),ta=m>=7?y+'/'+(y+1):(y-1)+'/'+y,sm=m>=7?'ganjil':'genap';
+ return kop()+jd('SURAT KETERANGAN AKTIF SEKOLAH',o.no)+`<div style="text-align:justify;margin:24px 0"><p>Yang bertanda tangan dibawah ini, Kepala UPT SPF SD Negeri 101731, Kecamatan Sunggal, Kabupaten Deli Serdang, menyatakan bahwa siswa yang tersebut dibawah ini:</p>
+ <table class="kv" style="margin:12px 0 12px 1.5rem">${kvr('Nama','<b>'+V(s.nama)+'</b>',9)}${kvr('Tempat/Tgl lahir',V(s.nama&&lahir(s)),9)}${kvr('NIS/NISN',V(s.nama&&[s.nipd,s.nisn].filter(Boolean).join(' / ')),9)}${kvr('Orangtua',V(o.ortu),9)}${kvr('Rombel',V(s.kelas),9)}</table>
+ <p>adalah <b>BENAR</b> siswa SD Negeri 101731 yang aktif dalam kegiatan belajar mengajar semester ${sm} tahun pelajaran ${ta}.</p><p style="padding-top:8px">Demikian surat keterangan ini dibuat untuk dapat digunakan seperlunya.</p></div>`+ttdB(o.tgl,o)}
+function hPin(){const o=SR.pip,s=sw(o.sid)||{},k=KS();
+ return kop()+jd('SURAT KETERANGAN',o.no)+`<div style="text-align:justify;margin:16px 0;line-height:1.55"><p>Yang bertanda tangan dibawah ini:</p><table class="kv">${kvr('Nama','<b>'+esc(k.nama)+'</b>',9)}${kvr('NIP',esc(k.nip),9)}${kvr('Jabatan','Kepala UPT SPF SDN 101731',9)}</table>
+ <p style="padding-top:4px">dengan ini menerangkan bahwa siswa yang namanya tersebut dibawah ini:</p><table class="kv">${kvr('Nama','<b>'+V(s.nama&&s.nama.toUpperCase())+'</b>',9)}${kvr('Tempat, Tgl. Lahir',V(s.nama&&lahir(s)),9)}${kvr('NISN',V(s.nisn),9)}${kvr('Kelas',V(s.kelas),9)}</table>
+ <p style="padding-top:4px">adalah <u>Benar</u> siswa SD Negeri 101731. Dan yang bersangkutan ada penerima PIP dan akan melakukan pengaktifan/pencairan di Bank BRI.</p><p style="padding-top:4px">Yang melakukan Pengaktifan/Pencairan adalah;</p>
+ <table class="kv">${kvr('Nama',V(o.png),9)}${kvr('NIK',V(o.nik),9)}${kvr('Hubungan Keluarga',V(o.hub),9)}</table><p style="padding-top:8px">Demikian surat keterangan ini kami buat agar dapat dipergunakan seperlunya.</p></div>`+ttdB(o.tgl,o)}
+function hPin2(){const o=SR.pindah,s=sw(o.sid)||{};
+ return kop()+`<div style="display:flex;justify-content:flex-end;margin-bottom:16px"><div style="text-align:right;font-size:12px"><p style="font-weight:600;margin-bottom:2px">Nomor Statistik Sekolah:</p><div class="nss">${NSS.split('').map(c=>`<span>${c}</span>`).join('')}</div></div></div>`+jd('SURAT KETERANGAN PINDAH SEKOLAH',o.no,16)+
+ `<div style="text-align:justify;line-height:1.55"><p>Yang bertanda tangan di bawah ini saya, Kepala UPT SPF SD Negeri 101731, Kecamatan SUNGGAL, Kabupaten DELI SERDANG, Provinsi SUMATERA UTARA, menerangkan bahwa:</p>
+ <table class="kv" style="margin:6px 0 6px 1.5rem">${kvr('Nama','<b>'+V(s.nama)+'</b>',10)}${kvr('Nomor Induk/NISN',V(s.nama&&[s.nipd,s.nisn].filter(Boolean).join(' / ')),10)}${kvr('Jenis Kelamin',esc(o.jk),10)}${kvr('Murid tingkat/kelas',V(s.kelas),10)}</table>
+ <p>Sesuai surat permohonan pindah sekolah oleh orang tua/wali murid :</p><table class="kv" style="margin:6px 0 6px 1.5rem">${kvr('Nama',V(o.ortu),10)}${kvr('Pekerjaan',V(o.krj),10)}</table>
+ <p>telah mengajukan pindah ke <b>${V(o.tuj)}</b>, dengan alasan: <i>${V(o.als)}</i>. Bersama ini kami sertakan Buku Laporan Pendidikan (Rapor) yang bersangkutan.</p></div>`+ttdB(o.tgl,o)}
+const srHtml=()=>'<div class="srp">'+({spt:hSpt,aktif:hAkt,pindah:hPin2,pip:hPin}[SR.tab])()+'</div>';
+/* ---- form ---- */
+const fi=(t,k,l,ph,ty)=>`<div><label class="fl">${l}</label><input type="${ty||'text'}" value="${esc(SR[t][k])}" placeholder="${esc(ph||'')}" oninput="srSet('${t}','${k}',this.value)"></div>`;
+const fc=(t,k,l,r)=>`<label class="ck2"><input type="checkbox" ${SR[t][k]?'checked':''} onchange="srSet('${t}','${k}',this.checked${r?',1':''})"> ${l}</label>`;
+const fp=t=>`<div class="bx"><div class="fl" style="margin-top:0">Pengesahan Dokumen:</div><div class="two2">${fc(t,'ttd','Tanda Tangan')}${fc(t,'stp','Stempel')}</div></div>`;
+const srOpts=t=>{const o=SR[t],q=o.q.toLowerCase(),L=S.siswa.filter(s=>s.nama.toLowerCase().includes(q));return L.length?L.map(s=>`<option value="${esc(s.nipd)}" ${s.nipd===o.sid?'selected':''}>${esc(s.nama)} (Rombel ${esc(s.kelas)})</option>`).join(''):'<option value="">-- Siswa tidak ditemukan --</option>'};
+const fs=t=>`<div><label class="fl">Pilih Nama Siswa:</label><input placeholder="Cari nama siswa..." value="${esc(SR[t].q)}" oninput="srQ('${t}',this.value)"><select size="5" id="sel_${t}" onchange="srPick('${t}',this.value)" style="margin-top:6px">${srOpts(t)}</select></div>`;
+const btnP=`<button class="btn" style="width:100%;margin-top:14px" onclick="srPrint()">🖨️ Cetak / PDF</button>`;
+function srForm(){const t=SR.tab,o=SR[t],T={spt:'Form SPT Guru',aktif:'Form Keterangan Siswa Aktif',pindah:'Form Surat Pindah Sekolah',pip:'Form Suket PIP'}[t];let b='';
+ if(t==='spt'){const st=SR.step;
+  const bar=`<div class="stp3">${['Nomor','Peserta','Kegiatan'].map((l,i)=>`<div onclick="srStep(${i+1})" class="${st===i+1?'on':''}"><span>${i+1}</span>${l}</div>`).join('')}</div>`;
+  if(st===1)b=fi('spt','no','Nomor Surat:','mis. 400.3.9.4/4/XI/2026')+fi('spt','tgl','Tanggal Surat:','','date');
+  else if(st===2){const G=S.guru.filter(g=>g.id!==S.kepsek);b=`<div class="fl" style="color:var(--pr)">DATA GURU BERTUGAS</div>`+o.pes.map((id,i)=>{const g=S.guru.find(x=>x.id===id)||{};return`<div class="pr"><select onchange="srPes(${i},this.value)"><option value="">-- Pilih Guru --</option>${G.map(x=>`<option value="${esc(x.id)}" ${x.id===id?'selected':''}>${esc(x.nama)}</option>`).join('')}</select><input readonly placeholder="NIP" value="${esc(g.nip||'')}"><input readonly placeholder="Jabatan" value="${esc(g.jab||'')}"><a onclick="srDel(${i})">Hapus Peserta</a></div>`}).join('')+`<button class="btn sec" style="width:100%" onclick="srAdd()">+ Tambah Peserta Lain</button>`}
+  else b=`<div><label class="fl">Nama Kegiatan:</label><textarea rows="3" oninput="srSet('spt','keg',this.value)">${esc(o.keg)}</textarea></div><div class="bx">${fc('spt','dn','Berdasarkan Surat Dinas / Atasan',1)}${o.dn?fi('spt','pj','Pejabat pembuat surat:')+'<div class="two2">'+fi('spt','nd','Nomor surat dinas:')+fi('spt','td','Tanggal surat dinas:','mis. 25 Oktober 2026')+'</div>':''}</div>${fp('spt')}<div class="two2">${fi('spt','hari','Hari/Tanggal:','mis. Senin - Jumat, 23-27 November 2026')}${fi('spt','pkl','Pukul:')}</div>${fi('spt','tmp','Tempat:')}`;
+  const nav=`<div class="row" style="margin-top:16px;flex-wrap:nowrap">${st>1?`<button class="btn sec" onclick="srStep(${st-1})">← Kembali</button>`:''}${st<3?`<button class="btn" style="flex:1" onclick="srStep(${st+1})">Lanjut →</button>`:`<button class="btn" style="flex:1" onclick="srPrint()">🖨️ Cetak / PDF</button>`}</div>`;
+  return head(T,t)+bar+b+nav}
+ if(t==='aktif')b=fs('aktif')+fi('aktif','ortu','Nama orang tua/wali:','otomatis dari data ayah')+fi('aktif','no','Nomor Surat:','mis. 400.3.12.1/11/IX/2026')+fi('aktif','tgl','Tanggal Surat:','','date')+fp('aktif');
+ if(t==='pindah')b=fs('pindah')+`<div class="two2">${fi('pindah','no','Nomor Surat:')}<div><label class="fl">Jenis Kelamin:</label><select onchange="srSet('pindah','jk',this.value)"><option ${o.jk==='Laki-laki'?'selected':''}>Laki-laki</option><option ${o.jk==='Perempuan'?'selected':''}>Perempuan</option></select></div></div>`+fi('pindah','tuj','Pindah ke Sekolah Tujuan:','mis. UPT SPF SD Negeri 104185 Sei Semayang, Kec. Sunggal')+fi('pindah','als','Alasan Pindah:')+`<div class="two2">${fi('pindah','ortu','Nama orang tua/wali:')}${fi('pindah','krj','Pekerjaan orang tua:')}</div>`+fi('pindah','tgl','Tanggal Surat:','','date')+fp('pindah');
+ if(t==='pip')b=fs('pip')+fi('pip','no','Nomor Surat:','mis. 400.3.5/17/VI/2026')+fi('pip','png','Nama Pengambil / Pencairan:')+fi('pip','nik','NIK Pengambil:')+fi('pip','hub','Hubungan Keluarga:')+fi('pip','tgl','Tanggal Surat:','','date')+fp('pip');
+ return head(T,t)+b+btnP}
+const head=(T,t)=>`<div class="row" style="justify-content:space-between;flex-wrap:nowrap;border-bottom:1px solid var(--bd);padding-bottom:10px"><b>${T}</b><button class="btn sec sm" style="color:var(--er)" onclick="srReset('${t}')">🗑️ Reset</button></div>`;
+const srRF=()=>{const e=$('#srf');if(e)e.innerHTML=srForm()};
+function srUpd(){const e=$('#srp');if(e)e.innerHTML=srHtml();srFit()}
+function srFit(){const w=$('#srw'),p=$('#srp');if(!w||!p)return;p.style.zoom=Math.min(1,(w.clientWidth-4)/794)}
+function srAfter(){srRF();srUpd()}
+function vBuat(){if(!canSurat())return'<div class="card">Menu ini hanya untuk admin dan operator sekolah.</div>';srInit();
+ return`<div class="seg" style="margin-bottom:14px;flex-wrap:wrap">${[['spt','📋 SPT'],['aktif','📄 Ket. Aktif'],['pindah','🏫 Surat Pindah'],['pip','💳 Suket PIP']].map(([k,l])=>`<button class="${SR.tab===k?'on':''}" onclick="srTab('${k}')">${l}</button>`).join('')}</div><div class="sgrid"><div class="card" id="srf"></div><div id="srw"><div id="srp"></div></div></div>`}
+function srTab(t){SR.tab=t;srSave();render()}
+function srSet(t,k,v,r){SR[t][k]=v;srSave();if(r)srRF();srUpd()}
+function srStep(n){SR.step=n;srSave();srRF()}
+function srQ(t,v){SR[t].q=v;$('#sel_'+t).innerHTML=srOpts(t)}
+function srPick(t,id){const o=SR[t],s=sw(id);o.sid=id;if(s){if(t==='aktif'||t==='pindah')o.ortu=s.ayah||s.ibu||'';if(t==='pindah')o.jk=s.jk==='P'?'Perempuan':'Laki-laki'}srSave();srRF();srUpd()}
+function srPes(i,v){SR.spt.pes[i]=v;srSave();srRF();srUpd()}
+function srAdd(){SR.spt.pes.push('');srSave();srRF()}
+function srDel(i){SR.spt.pes.splice(i,1);srSave();srRF();srUpd()}
+function srReset(t){SR[t]=srNew()[t];if(t==='spt')SR.step=1;srSave();srRF();srUpd()}
+function srPrint(){const o=SR[SR.tab];if(SR.tab!=='spt'&&!o.sid)return toast('Pilih nama siswa terlebih dahulu.',1);
+ S.t0=document.title;document.title={spt:'SPT - Guru',aktif:'Surat Keterangan Aktif Siswa',pindah:'Surat Keterangan Pindah Sekolah',pip:'Surat Keterangan Penerima PIP'}[SR.tab];
+ $('#printRoot').innerHTML=srHtml();document.body.classList.add('printing');
+ Promise.all([...document.querySelectorAll('#printRoot img')].map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r}))).then(()=>window.print())}
+window.addEventListener('afterprint',()=>{document.body.classList.remove('printing');const r=$('#printRoot');if(r)r.innerHTML='';if(S.t0)document.title=S.t0});
+window.addEventListener('resize',srFit);
+
+/* ---------- cadangan data (admin) ---------- */
+const vSet=()=>vSet0()+(isA()?'<div class="card" style="max-width:420px"><h3>Cadangan data</h3><div id="cdg" style="color:var(--mu)">Memuat…</div></div>':'');
+function cdgShow(r){const e=$('#cdg');if(!e)return;const t=r.terakhir;
+ e.innerHTML=`<p style="margin:0 0 8px">Cadangan otomatis: <b style="color:${r.aktif?'var(--ac)':'var(--er)'}">${r.aktif?'aktif (tiap tanggal 1, pukul 02.00 WIB)':'belum diaktifkan'}</b></p>${r.aktif?'':'<p style="margin:0 0 8px;font-size:13px">Jalankan fungsi <b>pasangJadwalCadangan</b> sekali di Apps Script.</p>'}<p style="margin:0 0 12px">Cadangan terakhir: <b>${t?esc(t.t.replace(/\./,':')):'belum ada'}</b>${t?` · <a href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">Buka folder ↗</a>`:''}</p><button class="btn" id="cdb" onclick="cdgNow()">Cadangkan sekarang</button>`}
+async function cdgLoad(){if(!isA()||!$('#cdg'))return;try{cdgShow(await api('cadangan'))}catch(e){$('#cdg').textContent=e.message}}
+async function cdgNow(){const b=$('#cdb');b.disabled=true;toast('Membuat cadangan, mohon tunggu…');try{cdgShow(await api('cadangkanSekarang'));toast('Cadangan selesai.')}catch(e){toast(e.message,1);b.disabled=false}}
+
 async function chPin(){try{await api('chPin',{old:$('#po').value,nw:$('#pn').value});S.user.def=false;$('#po').value=$('#pn').value='';toast('Berhasil diganti.')}catch(e){toast(e.message,1)}}
 
 setRole('guru');names();
