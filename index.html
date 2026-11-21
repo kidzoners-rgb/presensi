@@ -149,7 +149,7 @@ const $=s=>document.querySelector(s),esc=t=>String(t??'').replace(/[&<>"]/g,c=>(
 const pad=n=>String(n).padStart(2,'0'),iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),today=()=>iso(new Date());
 const BLN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const bl=m=>BLN[+m.slice(5,7)-1]+' '+m.slice(0,4),tgl=d=>+d.slice(8)+' '+BLN[+d.slice(5,7)-1]+' '+d.slice(0,4);
-const wk=d=>{const w=new Date(d+'T00:00:00').getDay();return w>0&&w<6&&!LIBUR[d]};
+const wk=d=>{const w=new Date(d+'T00:00:00').getDay();return w>0&&w<=6&&!LIBUR[d]};
 const days=m=>{const n=new Date(+m.slice(0,4),+m.slice(5),0).getDate(),r=[];for(let i=1;i<=n;i++){const d=m+'-'+pad(i);if(wk(d))r.push(d)}return r};
 const LIBUR={/* tambahan manual (libur sekolah): '2026-12-24':'Libur Sekolah' */};
 const dt=d=>{if(LIBUR[d])return'm';const w=new Date(d+'T00:00:00').getDay();return w===0?'m':''};
@@ -164,7 +164,7 @@ mapelList=()=>[...new Set(S.guru.filter(g=>g.id!==S.kepsek&&!g.wali).map(mpOf).f
 RMP=()=>isA()?(S.dT||''):MP(),
 RAG=()=>{if(isA()){const g=S.dT&&S.guru.find(x=>!x.wali&&mpOf(x)===S.dT);return g?agOf(g):''}return isSub()?S.user.ag:''},
 poolR=k=>sis(k).filter(s=>{const a=RAG();return!a||s.agama.toLowerCase().slice(0,3)===a.toLowerCase().slice(0,3)});
-const kep=()=>S.guru.find(g=>g.id===S.kepsek),wali=k=>S.guru.find(g=>g.wali===k&&g.id!==S.kepsek);
+const kep=()=>S.ks&&S.ks.nama?S.ks:S.guru.find(g=>g.id===S.kepsek),wali=k=>S.guru.find(g=>g.wali===k&&g.id!==S.kepsek);
 const nip=g=>!g?'-':/\d/.test(g.nip)?'NIP. '+g.nip:g.nip||'-';
 const ls=(k,v)=>{try{return v===undefined?localStorage.getItem(k):v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
 
@@ -253,8 +253,16 @@ function askSave(){const L=pList(),c={H:0,S:0,I:0,A:0};let u=0;S.pm={};if(!L.len
 async function doSave(){$('#ys').disabled=true;try{await api('save',{kelas:S.pK,tanggal:S.pD,marks:S.pm,mapel:MP()});S.dr={};await loadAtt(S.pD.slice(0,7));closeM();toast('Presensi tersimpan.');render()}catch(e){closeM();toast(e.message,1)}}
 
 /* ---------- data ---------- */
-function vKep(){const k=kep();return`<div class="card"><h3>Kepala sekolah saat ini</h3><p>${k?`<b>${esc(k.nama)}</b><br>${esc(nip(k))}`:'Belum dipilih.'}</p><div class="row"><select id="ks">${S.guru.map(g=>`<option value="${esc(g.id)}" ${g.id===S.kepsek?'selected':''}>${esc(g.nama)}</option>`).join('')}</select></div><div class="row" style="margin-top:10px"><input id="kg" placeholder="Golongan/Ruang, mis. Pembina Tk I, IVb" value="${esc(S.gol||GOL_DEF)}" style="flex:1"><button class="btn" onclick="setK()">Simpan</button></div><small style="color:var(--mu)">Nama yang dipilih tidak muncul lagi di Data Guru dan pilihan login guru.</small></div>`}
-async function setK(){try{await api('setKepsek',{id:$('#ks').value,gol:$('#kg').value});await boot();toast('Kepala sekolah disimpan.')}catch(e){toast(e.message,1)}}
+function vKep(){const k=S.ks||{nama:'',nip:'',gol:'',jab:'Kepala Sekolah',unit:'UPT SPF SD Negeri 101731'};
+ const f=(id,l,v,ph)=>`<label class="fld"><span>${l}</span><input id="${id}" value="${esc(v||'')}" placeholder="${esc(ph||'')}"></label>`;
+ return`<div class="card" style="max-width:560px;--c1:var(--ac);--c2:var(--ac)"><h3>Data kepala sekolah</h3><p style="color:var(--mu);margin:0">Data ini dipakai otomatis pada surat, rekap absen, dan PDF.${k.diubah?` Terakhir diubah ${wkt(k.diubah)} oleh ${esc(k.oleh)}.`:''}</p>
+ <label class="fld"><span>Isi dari Data Guru (opsional)</span><select id="kpick" onchange="kPick(this.value)"><option value="">-- pilih guru untuk mengisi nama dan NIP --</option>${S.guru.map(g=>`<option value="${esc(g.id)}">${esc(g.nama)}</option>`).join('')}</select></label>
+ ${f('kn','Nama (beserta gelar)',k.nama,'mis. Sarifuddin, S.Pd')}${f('kp','NIP',k.nip,'mis. 197102101994121002')}${f('kg','Golongan / Ruang',k.gol,'mis. Pembina Tk I, IVb')}${f('kj','Jabatan',k.jab,'Kepala Sekolah')}${f('ku','Unit kerja',k.unit,'UPT SPF SD Negeri 101731')}
+ <button class="btn" style="margin-top:16px" onclick="setK()">Simpan perubahan</button></div>`}
+function kPick(id){const g=S.guru.find(x=>x.id===id);if(!g)return;$('#kn').value=g.nama;$('#kp').value=g.nip||''}
+async function setK(){const v=id=>$('#'+id).value.trim();if(!v('kn'))return toast('Nama kepala sekolah wajib diisi.',1);
+ if(!confirm('Simpan data kepala sekolah?\nSurat dan rekap berikutnya akan memakai data ini.'))return;
+ try{await api('setKepsek',{nama:v('kn'),nip:v('kp'),gol:v('kg'),jab:v('kj'),unit:v('ku')});await boot();toast('Data kepala sekolah tersimpan.')}catch(e){toast(e.message,1)}}
 function vGuru(){const a=isA(),G=S.guru.filter(g=>g.id!==S.kepsek);
  return`<div class="card">${a?'<div class="row"><button class="btn sec sm" onclick="resetPin(\'all\')">Reset PIN semua guru</button></div>':''}<div class="tw"><table><tr><th>No</th><th>Nama</th><th>JK</th><th>NIP</th><th>Jabatan</th><th>Wali kelas</th><th>Mata pelajaran</th>${a?'<th></th>':''}</tr>${G.map((g,i)=>`<tr><td>${i+1}</td><td>${esc(g.nama)}</td><td>${esc(g.jk)}</td><td>${esc(g.nip)}</td><td>${esc(g.jab)}</td>${a?`<td><select id="w${g.row}"><option value="">-</option>${S.kelas.map(k=>`<option ${k===g.wali?'selected':''}>${k}</option>`).join('')}</select></td><td><input id="m${g.row}" value="${esc(g.mapel)}" placeholder="${esc(g.jab.replace(/^Guru\s+/i,''))}" style="width:160px"></td><td><button class="btn sm" onclick="updG(${g.row})">Simpan</button> <button class="btn sec sm" onclick="resetPin('${esc(g.id)}')">Reset PIN</button></td>`:`<td>${esc(g.wali||'-')}</td><td>${esc(g.mapel||'-')}</td>`}</tr>`).join('')}</table></div></div>`}
 async function updG(r){try{await api('updGuru',{row:r,wali:$('#w'+r).value,mapel:$('#m'+r).value});S.guru=(await api('boot')).guru;toast('Data guru disimpan ke spreadsheet.')}catch(e){toast(e.message,1)}}
@@ -275,7 +283,7 @@ function vDl(){if(!S.dM)S.dM=today().slice(0,7);const KL=dlKelas();if(!KL.includ
  <div class="tw"><table class="rc"><tr><th>No</th><th class="l">Nama</th><th>NISN</th><th>JK</th>${R.ds.map(d=>`<th class="${dt(d)}" title="${esc(LIBUR[d]||'')}">${+d.slice(8)}</th>`).join('')}<th>H</th><th>S</th><th>I</th><th>A</th><th>Total</th></tr>
  ${R.rows.map(r=>`<tr><td>${r.i+1}</td><td class="l">${esc(r.s.nama)}</td><td>${r.s.nisn}</td><td>${r.s.jk}</td>${r.cells.map((c,j)=>`<td class="${dt(R.ds[j])}">${c==='H'?'<span class="ck">✓</span>':c}</td>`).join('')}<td>${r.c.H}</td><td>${r.c.S}</td><td>${r.c.I}</td><td>${r.c.A}</td><td>${r.t}</td></tr>`).join('')}
  <tr style="font-weight:700"><td></td><td class="l">Jumlah</td><td></td><td></td>${R.ds.map(d=>'<td class="'+dt(d)+'"></td>').join('')}<td>${R.tot.H}</td><td>${R.tot.S}</td><td>${R.tot.I}</td><td>${R.tot.A}</td><td>${R.sum}</td></tr></table></div>
- <div class="sg"><div>Diketahui,<br>Kepala Sekolah<br><br><br><b>${esc(k?k.nama:'-')}</b><br>${esc(nip(k))}</div><div>Sunggal, ${tgl(R.last)}<br>${esc(sg.l)}<br><br><br><b>${esc(sg.g?sg.g.nama:'-')}</b><br>${esc(nip(sg.g))}</div></div></div>`}
+ <div class="sg"><div>Diketahui,<br>${esc(k&&k.jab?k.jab:'Kepala Sekolah')}<br><br><br><b>${esc(k?k.nama:'-')}</b><br>${esc(nip(k))}</div><div>Sunggal, ${tgl(R.last)}<br>${esc(sg.l)}<br><br><br><b>${esc(sg.g?sg.g.nama:'-')}</b><br>${esc(nip(sg.g))}</div></div></div>`}
 async function chM(v){if(!v)return;S.dM=v;await loadLibur(+v.slice(0,4));await loadAtt(v);render()}
 function pdf(){const{jsPDF}=window.jspdf,W=330,H=215,d=new jsPDF({orientation:'landscape',unit:'mm',format:[W,H]}),k=S.dK,m=S.dM,R=recap(k,m),kp=kep(),sg=sgn(k);
  /* F4 landscape (330 x 215 mm), dipaksa 1 halaman: tinggi baris menyesuaikan jumlah siswa */
@@ -293,7 +301,7 @@ function pdf(){const{jsPDF}=window.jspdf,W=330,H=215,d=new jsPDF({orientation:'l
   didDrawCell:h=>{const j=h.column.index-4;if(h.section!=='body'||j<0||j>=R.ds.length||h.cell.raw!=='H')return;const c=h.cell,u=Math.min(c.width,c.height)*.22,cx=c.x+c.width/2,cy=c.y+c.height/2;d.setDrawColor(18,140,80).setLineWidth(.35).line(cx-1.4*u,cy+.1*u,cx-.4*u,cy+1.2*u).line(cx-.4*u,cy+1.2*u,cx+1.6*u,cy-1.2*u);d.setDrawColor(225,231,239).setLineWidth(.2)}});
  let y=Math.min(d.lastAutoTable.finalY+10,H-10-30);const xr=W-95;
  d.setFont('helvetica','normal').setFontSize(9).setTextColor(20,33,61);
- d.text('Diketahui,',30,y).text('Kepala Sekolah',30,y+5).text('Sunggal, '+tgl(R.last),xr,y).text(sg.l,xr,y+5);
+ d.text('Diketahui,',30,y).text(kp&&kp.jab?kp.jab:'Kepala Sekolah',30,y+5).text('Sunggal, '+tgl(R.last),xr,y).text(sg.l,xr,y+5);
  d.setFont('helvetica','bold').text(kp?kp.nama:'-',30,y+25).text(sg.g?sg.g.nama:'-',xr,y+25);
  d.setFont('helvetica','normal').text(nip(kp),30,y+30).text(nip(sg.g),xr,y+30);d.save('Presensi-'+k+(RMP()?'-'+RMP().replace(/[^A-Za-z0-9]+/g,'_'):'')+'-'+m+'.pdf')}
 
@@ -361,19 +369,19 @@ const srNew=()=>({spt:{no:'',tgl:today(),pes:[''],keg:'',dn:false,pj:'Kepala Din
 let SR=null;
 function srInit(){if(SR)return;let d=null;try{d=JSON.parse(localStorage.getItem('sr_v1')||'null')}catch(e){}SR=Object.assign({tab:'spt',step:1,mode:'buat',hid:null,hidT:null},srNew(),d||{});SR.rw=null;['spt','aktif','pindah','pip'].forEach(t=>SR[t].tgl=today())}
 const srSave=()=>{try{localStorage.setItem('sr_v1',JSON.stringify(Object.assign({},SR,{rw:null})))}catch(e){}};
-const sw=id=>S.siswa.find(s=>s.nipd===id),KS=()=>{const g=kep()||{};return{nama:g.nama||'(pilih di menu Data Kepala Sekolah)',nip:g.nip||'-',gol:S.gol||GOL_DEF}};
+const sw=id=>S.siswa.find(s=>s.nipd===id),KS=()=>{const g=kep()||{};return{nama:g.nama||'(pilih di menu Data Kepala Sekolah)',nip:g.nip||'-',gol:g.gol||'-',jab:g.jab||'Kepala Sekolah',unit:g.unit||'UPT SPF SD Negeri 101731'}};
 function lahir(s){const t=s.tgl||'';let m=t.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/),d,mo,y;
  if(m){d=+m[1];mo=+m[2];y=m[3];if(mo>12){const z=d;d=mo;mo=z}}else if(m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)){y=m[1];mo=+m[2];d=+m[3]}
  return[s.tl,y&&BLN[mo-1]?d+' '+BLN[mo-1]+' '+y:t].filter(Boolean).join(', ')}
 const kop=()=>`<div class="kopw"><img src="${KOPF}" alt="Kop" onerror="this.style.display='none'"></div>`;
-const ttdB=(d,o)=>{const k=KS();return`<div class="ttw"><div class="ttb"><p>Sunggal, ${tgl(d||today())}</p><p style="margin-bottom:8px">Kepala Sekolah</p>${o.stp?`<div class="stp"><img src="${STPF}" alt="Stempel" onerror="this.style.display='none'"></div>`:''}${o.ttd?`<div class="ttd"><img src="${TTDF}" alt="Tanda tangan" onerror="this.style.display='none'"></div>`:''}<p class="nm">${esc(k.nama)}</p><p class="np">NIP. ${esc(k.nip)}</p></div></div>`};
+const ttdB=(d,o)=>{const k=KS();return`<div class="ttw"><div class="ttb"><p>Sunggal, ${tgl(d||today())}</p><p style="margin-bottom:8px">${esc(k.jab)}</p>${o.stp?`<div class="stp"><img src="${STPF}" alt="Stempel" onerror="this.style.display='none'"></div>`:''}${o.ttd?`<div class="ttd"><img src="${TTDF}" alt="Tanda tangan" onerror="this.style.display='none'"></div>`:''}<p class="nm">${esc(k.nama)}</p><p class="np">NIP. ${esc(k.nip)}</p></div></div>`};
 const jd=(t,n,sz)=>`<div class="jd"><h2${sz?` style="font-size:${sz}px"`:''}>${t}</h2><p style="margin-top:4px">Nomor : ${esc(n||'...')}</p></div>`;
 const kvr=(l,v,w)=>`<tr><td style="width:${w}rem">${l}</td><td>: ${v}</td></tr>`;
 const V=x=>esc(x||'...');
 function hSpt(){const o=SR.spt,k=KS(),P=o.pes.map(id=>S.guru.find(g=>g.id===id)).filter(Boolean);
  const rows=P.map((g,i)=>`<tr><td style="text-align:center">${i+1}.</td><td><b>${esc(g.nama)}</b></td><td style="text-align:center">${esc(g.nip||'-')}</td><td>${esc(g.jab||'-')}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center">...</td></tr>';
  const din=o.dn?`, berdasarkan surat dari ${V(o.pj)} Nomor: ${V(o.nd)} Tanggal ${V(o.td)}`:'';
- return kop()+jd('SURAT PERINTAH TUGAS (SPT)',o.no)+`<p>Yang bertanda tangan dibawah ini:</p><table class="kv">${kvr('Nama','<b>'+esc(k.nama)+'</b>',7)}${kvr('NIP',esc(k.nip),7)}${kvr('Gol/Ruang',esc(k.gol),7)}${kvr('Jabatan','Kepala Sekolah',7)}${kvr('Unit Kerja','UPT SPF SD Negeri 101731',7)}</table><p>menugaskan kepada:</p>
+ return kop()+jd('SURAT PERINTAH TUGAS (SPT)',o.no)+`<p>Yang bertanda tangan dibawah ini:</p><table class="kv">${kvr('Nama','<b>'+esc(k.nama)+'</b>',7)}${kvr('NIP',esc(k.nip),7)}${kvr('Gol/Ruang',esc(k.gol),7)}${kvr('Jabatan',esc(k.jab),7)}${kvr('Unit Kerja',esc(k.unit),7)}</table><p>menugaskan kepada:</p>
  <table class="bd"><thead><tr><th style="width:2.5rem">No.</th><th>Nama</th><th>NIP</th><th>Jabatan</th></tr></thead><tbody>${rows}</tbody></table>
  <p style="text-align:justify">Untuk mengikuti <b>${V(o.keg)}</b>${din}, yang dilaksanakan pada:</p><table class="kv">${kvr('Hari/Tanggal','<b>'+V(o.hari)+'</b>',8)}${kvr('Pukul',V(o.pkl),8)}${kvr('Tempat',V(o.tmp),8)}</table>
  <p style="padding-top:8px">Demikian surat perintah tugas ini diberikan untuk dapat dilaksanakan dengan penuh tanggung jawab.</p>`+ttdB(o.tgl,o)}
