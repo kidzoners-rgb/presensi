@@ -182,7 +182,8 @@ document.documentElement.dataset.t=ls('th')||(matchMedia('(prefers-color-scheme:
 
 /* ---------- login ---------- */
 function setRole(r){role=r;$('#rg').className=r=='guru'?'on':'';$('#ra').className=r=='admin'?'on':'';$('#fg').hidden=r=='admin';$("#plb").textContent=r=="admin"?'Password admin':'PIN';$('#pin').value='';$('#pin').inputMode=r=='admin'?'text':'numeric'}
-async function names(){try{const n=await api('names');$('#gsel').innerHTML=n.map(g=>`<option value="${esc(g.id)}">${esc(g.nama)}</option>`).join('')}catch(e){$('#le').textContent=e.message}}
+const tanpaGelar=n=>{let x=String(n||'').split(',')[0].trim();x=x.replace(/^(?:(?:Drs|Dra|Drg|Dr|Ir|Prof|H|Hj)\.\s*)+/i,'');let p=x.split(/\s+/);while(p.length>1&&/^[A-Z][A-Za-z]{0,2}\.[A-Za-z]/.test(p[p.length-1]))p.pop();x=p.join(' ').trim();return x||String(n||'')};
+async function names(){try{const n=await api('names');$('#gsel').innerHTML=n.map(g=>`<option value="${esc(g.id)}">${esc(tanpaGelar(g.nama))}</option>`).join('')}catch(e){$('#le').textContent=e.message}}
 async function loginGo(){const b=$('#lb');b.disabled=true;$('#le').textContent='';
  try{const r=await api('login',{role,id:$('#gsel').value,pin:$('#pin').value});S.token=r.token;ls('tk',r.token);await boot()}catch(e){$('#le').textContent=e.message}b.disabled=false}
 async function boot(){const r=await api('boot');Object.assign(S,r);S.dataT=Date.now();$('#login').hidden=true;$('#app').hidden=false;try{if(localStorage.getItem('sbh'))$('#app').classList.add('sbh')}catch(e){}
