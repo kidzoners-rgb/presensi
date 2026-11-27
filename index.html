@@ -113,6 +113,31 @@ html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc 
 .bn .dot{position:absolute;top:5px;right:calc(50% - 18px);border:2px solid var(--card);box-sizing:content-box;width:8px;height:8px}
 .bn button.lo:active{color:var(--er)}
 @media(max-width:899px){.bn{display:flex}}
+
+/* ---------- dropdown nama (login) ---------- */
+.cs{position:relative}
+.cst{width:100%;display:flex;align-items:center;gap:10px;border:1.5px solid var(--bd);background:var(--card);color:var(--tx);border-radius:14px;padding:8px 12px;font:inherit;font-weight:600;cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
+.cst:hover{border-color:var(--ac)}.cs.open .cst{border-color:var(--ac);box-shadow:0 0 0 4px color-mix(in srgb,var(--ac) 20%,transparent)}
+.cst>span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cst>span.ph{color:var(--mu);font-weight:400}
+.cst>i{font-style:normal;color:var(--mu);transition:transform .2s;font-size:14px}.cs.open .cst>i{transform:rotate(180deg)}
+.csav{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px;flex:none;background:var(--bd)}
+.csp{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--card);border:1.5px solid var(--bd);border-radius:16px;box-shadow:0 18px 40px -12px #0006;z-index:41;overflow:hidden;transform-origin:top;animation:csin .16s ease-out}
+@keyframes csin{from{opacity:0;transform:translateY(-6px) scale(.98)}}
+#csq{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--bd);border-radius:0;background:var(--in);color:var(--tx);padding:12px 14px;font:inherit;outline:none}
+#csl{max-height:240px;overflow:auto;padding:6px;overscroll-behavior:contain}
+.csi{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;cursor:pointer;font-weight:600}
+.csi span{flex:1;min-width:0}.csi i{font-style:normal;color:var(--ac);font-weight:800;opacity:0}
+.csi.hl{background:var(--in)}.csi.on{background:color-mix(in srgb,var(--ac) 14%,transparent)}.csi.on i{opacity:1}
+.cse{padding:16px;text-align:center;color:var(--mu);font-size:13px}
+.csb{display:none}
+@media(max-width:560px){
+ .csb{display:block;position:fixed;inset:0;background:#0007;z-index:40;animation:csfd .2s}
+ @keyframes csfd{from{opacity:0}}
+ .csp{position:fixed;left:0;right:0;top:auto;bottom:0;border-radius:22px 22px 0 0;border-width:0;padding-bottom:env(safe-area-inset-bottom);animation:csup .22s ease-out}
+ @keyframes csup{from{transform:translateY(100%)}}
+ .csp:before{content:'';display:block;width:42px;height:4px;border-radius:9px;background:var(--bd);margin:10px auto 2px}
+ #csl{max-height:min(52vh,420px)}.csi{padding:11px 10px}
+}
 </style>
 </head>
 <body>
@@ -120,7 +145,13 @@ html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc 
  <div class="lc">
   <img class="lgo" src="logo.png" alt="Logo" onload="cleanLogo(this)" onerror="lgErr(this)"><h1>Ruang Kelasku</h1><p>Masuk untuk mengisi dan melihat presensi.</p>
   <div class="seg"><button id="rg" class="on" onclick="setRole('guru')">Guru</button><button id="ra" onclick="setRole('admin')">Admin</button></div>
-  <div id="fg"><label>Nama guru</label><select id="gsel"><option>Memuat…</option></select></div>
+  <div id="fg"><label>Nama guru</label><select id="gsel" style="display:none"></select>
+   <div class="cs" id="cs">
+    <button type="button" class="cst" id="cst" onclick="csTog()" aria-haspopup="listbox"><b class="csav" id="csav">?</b><span class="ph" id="csn">Memuat daftar nama…</span><i>▾</i></button>
+    <div class="csb" id="csb" hidden onclick="csClose()"></div>
+    <div class="csp" id="csp" hidden><input id="csq" type="search" placeholder="🔍 Cari nama…" autocomplete="off" oninput="csF()" onkeydown="csKey(event)"><div id="csl" role="listbox"></div></div>
+   </div>
+  </div>
   <label id="plb">PIN</label><input id="pin" type="password" autocomplete="current-password" onkeydown="if(event.key=='Enter')loginGo()">
   <div class="err" id="le"></div><button class="btn" style="width:100%;margin-top:6px" id="lb" onclick="loginGo()">Masuk</button>
  </div>
@@ -183,8 +214,21 @@ document.documentElement.dataset.t=ls('th')||(matchMedia('(prefers-color-scheme:
 /* ---------- login ---------- */
 function setRole(r){role=r;$('#rg').className=r=='guru'?'on':'';$('#ra').className=r=='admin'?'on':'';$('#fg').hidden=r=='admin';$("#plb").textContent=r=="admin"?'Password admin':'PIN';$('#pin').value='';$('#pin').inputMode=r=='admin'?'text':'numeric'}
 const tanpaGelar=n=>{let x=String(n||'').split(',')[0].trim();x=x.replace(/^(?:(?:Drs|Dra|Drg|Dr|Ir|Prof|H|Hj)\.\s*)+/i,'');let p=x.split(/\s+/);while(p.length>1&&/^[A-Z][A-Za-z]{0,2}\.[A-Za-z]/.test(p[p.length-1]))p.pop();x=p.join(' ').trim();return x||String(n||'')};
-async function names(){try{const n=await api('names');$('#gsel').innerHTML=n.map(g=>`<option value="${esc(g.id)}">${esc(tanpaGelar(g.nama))}</option>`).join('')}catch(e){$('#le').textContent=e.message}}
-async function loginGo(){const b=$('#lb');b.disabled=true;$('#le').textContent='';
+let CSN=[],CSH=0;
+const csCol=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%360;return`linear-gradient(135deg,hsl(${h} 70% 52%),hsl(${(h+40)%360} 70% 42%))`};
+const csAv=(n,e)=>{e.textContent=(n||'?').trim()[0].toUpperCase();e.style.background=csCol(n)};
+function csR(){const q=$('#csq').value.trim().toLowerCase(),cur=$('#gsel').value,L=CSN.filter(g=>g.nama.toLowerCase().includes(q));CSH=Math.min(CSH,Math.max(0,L.length-1));
+ $('#csl').innerHTML=L.length?L.map((g,i)=>`<div class="csi${g.id===cur?' on':''}${i===CSH?' hl':''}" role="option" data-id="${esc(g.id)}" onclick="csPick(this.dataset.id)" onmousemove="csHl(${i})"><b class="csav" style="background:${csCol(g.nama)}">${esc(g.nama[0].toUpperCase())}</b><span>${esc(g.nama)}</span><i>✓</i></div>`).join(''):'<div class="cse">Nama tidak ditemukan.</div>'}
+function csHl(i){CSH=i;document.querySelectorAll('#csl .csi').forEach((e,x)=>e.classList.toggle('hl',x===i))}
+function csF(){CSH=0;csR()}
+function csTog(){$('#csp').hidden?csOpen():csClose()}
+function csOpen(){if(!CSN.length)return;$('#csq').value='';CSH=0;csR();$('#csp').hidden=false;$('#csb').hidden=false;$('#cs').classList.add('open');const o=document.querySelector('#csl .csi.on');if(o){o.scrollIntoView({block:'center'});CSH=[...document.querySelectorAll('#csl .csi')].indexOf(o);csHl(CSH)}if(matchMedia('(hover:hover)').matches)$('#csq').focus()}
+function csClose(){$('#csp').hidden=true;$('#csb').hidden=true;$('#cs').classList.remove('open')}
+function csPick(id){const g=CSN.find(x=>x.id===id);if(!g)return;$('#gsel').value=id;$('#csn').textContent=g.nama;$('#csn').className='';csAv(g.nama,$('#csav'));$('#le').textContent='';csClose();$('#pin').focus()}
+function csKey(e){const n=document.querySelectorAll('#csl .csi').length;if(e.key==='Escape'){csClose();$('#cst').focus()}else if(!n)return;else if(e.key==='ArrowDown'){e.preventDefault();csHl((CSH+1)%n);document.querySelectorAll('#csl .csi')[CSH].scrollIntoView({block:'nearest'})}else if(e.key==='ArrowUp'){e.preventDefault();csHl((CSH+n-1)%n);document.querySelectorAll('#csl .csi')[CSH].scrollIntoView({block:'nearest'})}else if(e.key==='Enter'){e.preventDefault();csPick(document.querySelectorAll('#csl .csi')[CSH].dataset.id)}}
+document.addEventListener('click',e=>{if(!$('#csp').hidden&&!$('#cs').contains(e.target))csClose()});
+async function names(){try{const n=await api('names');CSN=n.map(g=>({id:String(g.id),nama:tanpaGelar(g.nama)}));$('#gsel').innerHTML=CSN.map(g=>`<option value="${esc(g.id)}">${esc(g.nama)}</option>`).join('');$('#gsel').selectedIndex=-1;$('#csn').textContent='Pilih nama Anda';$('#csn').className='ph'}catch(e){$('#csn').textContent='Gagal memuat daftar nama';$('#le').textContent=e.message}}
+async function loginGo(){if(role==='guru'&&!$('#gsel').value){$('#le').textContent='Pilih nama Anda terlebih dahulu.';csOpen();return}const b=$('#lb');b.disabled=true;$('#le').textContent='';
  try{const r=await api('login',{role,id:$('#gsel').value,pin:$('#pin').value});S.token=r.token;ls('tk',r.token);await boot()}catch(e){$('#le').textContent=e.message}b.disabled=false}
 async function boot(){const r=await api('boot');Object.assign(S,r);S.dataT=Date.now();$('#login').hidden=true;$('#app').hidden=false;try{if(localStorage.getItem('sbh'))$('#app').classList.add('sbh')}catch(e){}
  $('#who').textContent=S.user.nama+(S.user.wali?' · Kelas '+S.user.wali:'')+(isSub()?' · '+S.user.mapel:'');
