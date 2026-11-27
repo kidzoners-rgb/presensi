@@ -138,6 +138,7 @@ html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc 
  .csp:before{content:'';display:block;width:42px;height:4px;border-radius:9px;background:var(--bd);margin:10px auto 2px}
  #csl{max-height:min(52vh,420px)}.csi{padding:11px 10px}
 }
+.demobar{background:#fde68a;color:#7a4a00;font-size:12px;font-weight:700;text-align:center;padding:7px 12px;line-height:1.35}html[data-t=dark] .demobar{background:#4d3c0a;color:#ffd27a}
 </style>
 </head>
 <body>
@@ -171,7 +172,7 @@ html[data-t=dark] .rc .m{background:#5a1d19;color:#ffb4ab}html[data-t=dark] .rc 
   <button data-v="surat" onclick="go('surat')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>Surat Masuk</span><i class="dot" id="dotB" hidden></i></button>
   <button class="lo" onclick="if(confirm('Keluar dari aplikasi?'))logout()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg><span>Keluar</span></button>
  </nav>
- <div class="main"><header><button class="mb" onclick="togSb()" title="Menu">☰<i class="dot" id="dotM" hidden></i></button><h2 id="ttl"></h2><span class="chip" id="who"></span></header><main id="v"></main><footer class="cp">© 2026 | Domo</footer></div>
+ <div class="main"><div id="demoBar" class="demobar" hidden>🧪 MODE DUMMY · data contoh (Kelas 0, 5 siswa). Semua perubahan hanya sementara di layar ini dan TIDAK disimpan ke database.</div><header><button class="mb" onclick="togSb()" title="Menu">☰<i class="dot" id="dotM" hidden></i></button><h2 id="ttl"></h2><span class="chip" id="who"></span></header><main id="v"></main><footer class="cp">© 2026 | Domo</footer></div>
 </div>
 <div id="mo"></div><div id="toast" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -204,7 +205,7 @@ const nip=g=>!g?'-':/\d/.test(g.nip)?'NIP. '+g.nip:g.nip||'-';
 const ls=(k,v)=>{try{return v===undefined?localStorage.getItem(k):v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
 
 const LY={};async function loadLibur(y){if(LY[y])return;try{Object.assign(LIBUR,await api('libur',{year:y}));LY[y]=1}catch(e){}}
-async function api(a,d={}){let r;try{r=await fetch(API,{method:'POST',body:JSON.stringify({a,t:S.token,...d})})}catch(e){throw new Error('Tidak dapat terhubung ke server.')}
+async function api(a,d={}){if(S.demo)return demoApi(a,d);let r;try{r=await fetch(API,{method:'POST',body:JSON.stringify({a,t:S.token,...d})})}catch(e){throw new Error('Tidak dapat terhubung ke server.')}
  const j=await r.json();if(!j.ok)throw new Error(j.e);return j.d}
 function toast(t,e){const x=$('#toast');x.textContent=t;x.style.background=e?'#d92d20':'';x.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>x.hidden=true,2800)}
 function modal(h,w){$('#mo').innerHTML='<div class="md" onclick="if(event.target===this)closeM()"><div'+(w?' style="max-width:'+w+'px"':'')+'>'+h+'</div></div>'}const closeM=()=>$('#mo').innerHTML='';
@@ -214,6 +215,34 @@ document.documentElement.dataset.t=ls('th')||(matchMedia('(prefers-color-scheme:
 /* ---------- login ---------- */
 function setRole(r){role=r;$('#rg').className=r=='guru'?'on':'';$('#ra').className=r=='admin'?'on':'';$('#fg').hidden=r=='admin';$("#plb").textContent=r=="admin"?'Password admin':'PIN';$('#pin').value='';$('#pin').inputMode=r=='admin'?'text':'numeric'}
 const tanpaGelar=n=>{let x=String(n||'').split(',')[0].trim();x=x.replace(/^(?:(?:Drs|Dra|Drg|Dr|Ir|Prof|H|Hj)\.\s*)+/i,'');let p=x.split(/\s+/);while(p.length>1&&/^[A-Z][A-Za-z]{0,2}\.[A-Za-z]/.test(p[p.length-1]))p.pop();x=p.join(' ').trim();return x||String(n||'')};
+
+/* ---------- MODE DUMMY (sandbox lokal, tidak pernah menghubungi server/database) ---------- */
+/* Masuk: pilih nama "Velli Marwan Domo", lalu ketik PIN dummy di bawah. PIN asli akun tetap berjalan normal. */
+const DEMO_PIN='246810';let DEMO=null;
+const isDemoLogin=()=>{if(role!=='guru')return false;const g=CSN.find(x=>x.id===$('#gsel').value);return !!g&&/^velli marwan domo$/i.test(g.nama)&&$('#pin').value===DEMO_PIN};
+function demoInit(){const t=today(),sw=[['Andi Dummy','L','Islam'],['Bunga Dummy','P','Islam'],['Citra Dummy','P','Kristen'],['Dimas Dummy','L','Kristen'],['Eka Dummy','P','Islam']];
+ return{user:{role:'guru',id:'demo',nama:(CSN.find(x=>x.id===$('#gsel').value)||{}).raw||'Velli Marwan Domo, S.T.',wali:'0',mapel:'',ag:'',def:false},
+  siswa:sw.map((x,i)=>({nipd:'D000'+(i+1),nisn:'000000000'+(i+1),nama:x[0],jk:x[1],tl:'Kota Dummy',tgl:'01/01/2016',agama:x[2],ayah:'Ayah Dummy',ibu:'Ibu Dummy',kelas:'0'})),
+  guru:[{id:'demo',row:2,nama:'Velli Marwan Domo, S.T.',jk:'L',nip:'-',jab:'Guru Kelas',wali:'0',mapel:'',pang:'',lahir:''}],
+  ks:{nama:'Kepala Sekolah Dummy',nip:'-',gol:'-',jab:'Kepala Sekolah',unit:'SD Negeri Dummy',diubah:'',oleh:''},
+  surat:[{id:'demo1',waktu:t+' 07:30',judul:'Contoh surat edaran (dummy, belum dibaca)',link:'about:blank',catatan:'Surat contoh untuk menguji tampilan Surat Masuk.',pen:['demo'],oleh:'Admin'},{id:'demo2',waktu:t+' 06:45',judul:'Contoh surat undangan (dummy, sudah dibaca)',link:'about:blank',catatan:'',pen:['demo'],oleh:'Admin'}],
+  baca:{demo2:['demo']},att:{}}}
+function demoMonth(m){if(DEMO.att[m])return DEMO.att[m];const t=today(),[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),r=[];
+ for(let d=1;d<=n;d++){const ds=m+'-'+String(d).padStart(2,'0');if(ds>=t)break;const w=new Date(y,mo-1,d).getDay();if(w===0||w===6)continue;
+  DEMO.siswa.forEach((s,i)=>{const k=(d*7+i*3)%23;r.push([ds,'0',s.nipd,k===0?'S':k===1?'I':k===2?'A':'H',''])})}
+ return DEMO.att[m]=r}
+async function demoApi(a,d){const cl=x=>JSON.parse(JSON.stringify(x));
+ switch(a){
+  case 'boot':return cl({user:DEMO.user,siswa:DEMO.siswa,guru:DEMO.guru,kepsek:'',ks:DEMO.ks,kelas:['0']});
+  case 'surat':return cl({list:DEMO.surat,baca:DEMO.baca});
+  case 'bacaSurat':DEMO.baca[d.id]=['demo'];return 1;
+  case 'libur':return {};
+  case 'att':return cl(demoMonth(String(d.month).slice(0,7)));
+  case 'save':{if(d.kelas!=='0'||d.mapel)throw new Error('Mode dummy: hanya Kelas 0.');if(!/^\d{4}-\d{2}-\d{2}$/.test(d.tanggal))throw new Error('Tanggal tidak valid.');
+   const m=d.tanggal.slice(0,7),cur=demoMonth(m).filter(r=>!(r[0]===d.tanggal&&r[1]==='0'));
+   Object.keys(d.marks||{}).filter(n=>'HSIA'.includes(d.marks[n])).forEach(n=>cur.push([d.tanggal,'0',n,d.marks[n],'']));DEMO.att[m]=cur;return 1}
+  case 'chPin':throw new Error('Mode dummy: PIN tidak dapat diganti.');
+  default:throw new Error('Mode dummy: perubahan data tidak disimpan.')}}
 let CSN=[],CSH=0;
 const csCol=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%360;return`linear-gradient(135deg,hsl(${h} 70% 52%),hsl(${(h+40)%360} 70% 42%))`};
 const csAv=(n,e)=>{e.textContent=(n||'?').trim()[0].toUpperCase();e.style.background=csCol(n)};
@@ -227,11 +256,11 @@ function csClose(){$('#csp').hidden=true;$('#csb').hidden=true;$('#cs').classLis
 function csPick(id){const g=CSN.find(x=>x.id===id);if(!g)return;$('#gsel').value=id;$('#csn').textContent=g.nama;$('#csn').className='';csAv(g.nama,$('#csav'));$('#le').textContent='';csClose();$('#pin').focus()}
 function csKey(e){const n=document.querySelectorAll('#csl .csi').length;if(e.key==='Escape'){csClose();$('#cst').focus()}else if(!n)return;else if(e.key==='ArrowDown'){e.preventDefault();csHl((CSH+1)%n);document.querySelectorAll('#csl .csi')[CSH].scrollIntoView({block:'nearest'})}else if(e.key==='ArrowUp'){e.preventDefault();csHl((CSH+n-1)%n);document.querySelectorAll('#csl .csi')[CSH].scrollIntoView({block:'nearest'})}else if(e.key==='Enter'){e.preventDefault();csPick(document.querySelectorAll('#csl .csi')[CSH].dataset.id)}}
 document.addEventListener('click',e=>{if(!$('#csp').hidden&&!$('#cs').contains(e.target))csClose()});
-async function names(){try{const n=await api('names');CSN=n.map(g=>({id:String(g.id),nama:tanpaGelar(g.nama)}));$('#gsel').innerHTML=CSN.map(g=>`<option value="${esc(g.id)}">${esc(g.nama)}</option>`).join('');$('#gsel').selectedIndex=-1;$('#csn').textContent='Pilih nama Anda';$('#csn').className='ph'}catch(e){$('#csn').textContent='Gagal memuat daftar nama';$('#le').textContent=e.message}}
-async function loginGo(){if(role==='guru'&&!$('#gsel').value){$('#le').textContent='Pilih nama Anda terlebih dahulu.';csOpen();return}const b=$('#lb');b.disabled=true;$('#le').textContent='';
+async function names(){try{const n=await api('names');CSN=n.map(g=>({id:String(g.id),nama:tanpaGelar(g.nama),raw:g.nama}));$('#gsel').innerHTML=CSN.map(g=>`<option value="${esc(g.id)}">${esc(g.nama)}</option>`).join('');$('#gsel').selectedIndex=-1;$('#csn').textContent='Pilih nama Anda';$('#csn').className='ph'}catch(e){$('#csn').textContent='Gagal memuat daftar nama';$('#le').textContent=e.message}}
+async function loginGo(){if(role==='guru'&&!$('#gsel').value){$('#le').textContent='Pilih nama Anda terlebih dahulu.';csOpen();return}if(isDemoLogin()){S.demo=true;S.token='demo';DEMO=demoInit();try{await boot()}catch(e){S.demo=false;S.token='';$('#le').textContent=e.message}return}const b=$('#lb');b.disabled=true;$('#le').textContent='';
  try{const r=await api('login',{role,id:$('#gsel').value,pin:$('#pin').value});S.token=r.token;ls('tk',r.token);await boot()}catch(e){$('#le').textContent=e.message}b.disabled=false}
 async function boot(){const r=await api('boot');Object.assign(S,r);S.dataT=Date.now();$('#login').hidden=true;$('#app').hidden=false;try{if(localStorage.getItem('sbh'))$('#app').classList.add('sbh')}catch(e){}
- $('#who').textContent=S.user.nama+(S.user.wali?' · Kelas '+S.user.wali:'')+(isSub()?' · '+S.user.mapel:'');
+ $('#demoBar').hidden=!S.demo;$('#who').textContent=(S.demo?'🧪 ':'')+S.user.nama+(S.user.wali?' · Kelas '+S.user.wali:'')+(isSub()?' · '+S.user.mapel:'');
  const m=[['dash','📊','Dashboard'],['pres','✅','Presensi'],...(isA()?[['kepsek','🎓','Data Kepala Sekolah']]:[]),['guru','👥','Data Guru'],['siswa','🧒','Data Siswa'],['dl','📄','Rekap Absen'],['surat','✉️','Surat Masuk'],['set','⚙️','Setting']];
  $('#nv').innerHTML=m.map(x=>`<button data-v="${x[0]}"${needPin()&&x[0]!=='set'?' class="lk"':''} onclick="go('${x[0]}')"><span>${x[1]}</span>${x[2]}${x[0]==='surat'?'<i class="dot" id="dotS" hidden></i>':''}</button>`).join('');if(!isA())await refreshSurat();await loadLibur(new Date().getFullYear());if(isSub()&&!S.pK)S.view='pres';if(S.user.def)S.view='set';await go(S.view);if(S.user.def)toast('Ganti '+(isA()?'password':'PIN')+' standar Anda terlebih dahulu.')}
 function logout(){ls('tk',null);S.token='';S.user=null;location.reload()}
